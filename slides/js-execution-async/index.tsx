@@ -56,10 +56,10 @@ const Frame = ({ eyebrow, title, children, section = 'JAVASCRIPT', titleSize = 7
   </section>
 );
 
-const Code = ({ children, title = 'JAVASCRIPT', size = 32, style }: { children: string; title?: string; size?: number; style?: CSSProperties }) => (
+const Code = ({ children, title = 'JAVASCRIPT', language = 'JS', size = 32, style }: { children: string; title?: string; language?: 'JS' | 'TS' | 'JSON'; size?: number; style?: CSSProperties }) => (
   <div style={{ background: codeBg, color: '#F5F3EB', borderRadius: 'var(--osd-radius)', padding: '28px 32px 30px', boxSizing: 'border-box', ...style }}>
     <div style={{ ...label, fontSize: 22, color: '#BCBFB1', borderBottom: '1px solid #494D41', paddingBottom: 15, marginBottom: 20, display: 'flex', justifyContent: 'space-between' }}>
-      <span>{title}</span><span style={{ color: yellow }}>JS</span>
+      <span>{title}</span><span style={{ color: yellow }}>{language}</span>
     </div>
     <pre style={{ margin: 0, fontFamily: mono, fontSize: size, lineHeight: 1.4, whiteSpace: 'pre', fontWeight: 400, tabSize: 2 }}><code>{children}</code></pre>
   </div>
@@ -445,6 +445,208 @@ const Recap: Page = () => (
   </Frame>
 );
 
+// Part 3: nine questions, 20 minutes. Reuse the runtime model; add static checking.
+const TypeScriptBoundary: Page = () => (
+  <Frame eyebrow="PART 3 / TYPESCRIPT / 01" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
+    <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 64px 1fr', gap: 24, alignItems: 'center' }}>
+      <Code title="執行前 / STATIC TYPE CHECKING" language="TS" size={30}>{`function add(a: number, b: number): number {
+  return a + b;
+}`}</Code>
+      <Arrow />
+      <Code title="移除型別後 / JAVASCRIPT" size={30}>{`function add(a, b) {
+  return a + b;
+}`}</Code>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 32 }}>
+      <Note tag="執行前多一道檢查" title="呼叫時，有沒有傳錯型別？">例如 add("1", 2)，會收到型別錯誤。</Note>
+      <Note tag="RUNTIME 沿用剛才的模型" title="執行的仍然是 JavaScript。"><div style={{ fontSize: 32, lineHeight: 1.5 }}>Event Loop、Call Stack、Promise、<br />async / await、task / microtask 都不變。</div></Note>
+    </div>
+    <Strip style={{ marginTop: 20 }}>這些型別在 compile time 參與檢查；runtime 不會保留型別註記。</Strip>
+  </Frame>
+);
+
+const TypeInference: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 02 / 從程式碼看得出來的事" title="每個地方，都要手動標型別嗎？" section="TYPE INFERENCE">
+    <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 64 }}>
+      <Code title="只標明函式的輸入" language="TS" size={36}>{`const name = "Kylen";
+const age = 20;
+
+function add(a: number, b: number) {
+  return a + b;
+}`}</Code>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
+        <Note tag="① 從初始值推斷 / LITERAL TYPE" title="const 保留更精確的型別。">name → "Kylen"（string）<br />age → 20（number）</Note>
+        <Note tag="② 從 return 推斷" title="add 的回傳型別 → number">兩個 number 相加，結果也是 number。</Note>
+      </div>
+    </div>
+    <Strip style={{ marginTop: 36 }}>Type inference（型別推斷）：能從程式碼知道的，不必重複 annotation。</Strip>
+  </Frame>
+);
+
+const StructuralTyping: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 03 / 後端工程師最需要換的視角" title="沒有 implements User，為什麼也能傳入？" titleSize={68} section="STRUCTURAL TYPING">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <Code title="函式需要的結構 / SHAPE" language="TS" size={32}>{`interface User {
+  id: number;
+  name: string;
+}
+function printUser(user: User) {
+  console.log(user.name);
+}`}</Code>
+      <div>
+        <Code title="呼叫端已經有的資料" language="TS" size={32}>{`const data = {
+  id: 1,
+  name: "Kylen",
+  email: "kylen@example.com"
+};
+
+printUser(data); // OK`}</Code>
+      </div>
+    </div>
+    <Strip style={{ marginTop: 30 }}>Structural typing：主要看「至少具有需要的 shape」，不要求正式宣告屬於 User。</Strip>
+    <p style={{ ...body, fontSize: 28, color: muted, marginTop: 16 }}>直接傳入新寫的 object literal，另有多餘屬性檢查；這裡傳的是既有變數 data。</p>
+  </Frame>
+);
+
+const UnionType: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 04 / 同一個輸入有兩種可能" title="ID 可能是字串，也可能是數字，怎麼寫？" titleSize={70} section="UNION TYPE">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
+      <Code title="先把可能性寫出來" language="TS" size={36}>{`function printId(id: string | number) {
+  console.log(id);
+}
+
+printId("A12");
+printId(12);`}</Code>
+      <Note tag="STRING | NUMBER" title="其中一種，就符合輸入要求。">這就是 union type（聯合型別）。<br /><br />進到函式時，還不知道這次<br />收到的是哪一種。</Note>
+    </div>
+    <Steps>
+      <Step><Strip style={{ marginTop: 42 }}>這時直接呼叫 id.toUpperCase()？還不行，因為 id 也可能是 number。</Strip></Step>
+    </Steps>
+  </Frame>
+);
+
+const TypeNarrowing: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 05 / 先判斷，再使用" title="進到這個分支，id 還可能是數字嗎？" titleSize={72} section="NARROWING">
+    <div style={{ display: 'grid', gridTemplateColumns: '1050px 1fr', gap: 64 }}>
+      <Code title="沿著 JavaScript 的 control flow 往下讀" language="TS" size={34}>{`function printId(id: string | number) {
+  if (typeof id === "string") {
+    console.log(id.toUpperCase());
+  } else {
+    console.log(id);
+  }
+}`}</Code>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 30 }}>
+        <Steps>
+          <Step><Note tag="IF 成立 / 只剩 STRING" title="可以用 toUpperCase()。">typeof 是實際執行的 JS 判斷。</Note></Step>
+          <Step><Note tag="ELSE / 排除 STRING" title="這裡只剩 number。">TS 在檢查時追蹤這個分支。</Note></Step>
+        </Steps>
+      </div>
+    </div>
+    <Strip style={{ marginTop: 36 }}>Narrowing（型別縮小）：跟著流程，判斷這一行的值還可能是哪些型別。</Strip>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 12 }}>前半場追蹤「什麼時候執行」；現在追蹤「這一行可能是什麼型別」。</p>
+  </Frame>
+);
+
+const InterfaceAndType: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 06 / 替型別命名" title="同一個 User shape，可以怎麼描述？" titleSize={72} section="INTERFACE / TYPE">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <div>
+        <Code title="INTERFACE / 描述 OBJECT SHAPE" language="TS" size={30}>{`interface User {
+  id: number;
+  name: string;
+}
+
+interface Admin extends User {
+  permissions: string[];
+}`}</Code>
+        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>用 extends 擴充 shape。<br />也支援同名宣告合併（declaration merging）。</p>
+      </div>
+      <div>
+        <Code title="TYPE / 同樣能描述 USER，也能組合型別" language="TS" size={30}>{`type User = {
+  id: number;
+  name: string;
+};
+
+type ID = string | number;
+type Status =
+  | "pending" | "success" | "error";`}</Code>
+        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>替型別命名，也能表達 union、intersection。<br />一般 object shape，兩者很多時候都可以。</p>
+      </div>
+    </div>
+  </Frame>
+);
+
+const GenericResponse: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 07 / 沿用 USER：ID + NAME" title="共用 API 包裝，怎麼保留 data 的型別？" titleSize={70} section="GENERICS">
+    <div style={{ display: 'grid', gridTemplateColumns: '700px 1fr', gap: 48 }}>
+      <div>
+        <Code title="先看這個版本：DATA 是 ANY" language="TS" size={30}>{`interface ApiResponse {
+  data: any;
+  message: string;
+}`}</Code>
+        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>any 不會擋下 data.naem 的拼字錯誤。</p>
+        <div style={{ marginTop: 32 }}><Note tag="GENERICS / 泛型" title="T：先保留一個型別的位置。">填入 User，data 就是 User。</Note></div>
+      </div>
+      <Steps>
+        <Step>
+          <Code title="填入 USER，後續仍然知道 NAME 是 STRING" language="TS" size={30}>{`interface ApiResponse<T> {
+  data: T;
+  message: string;
+}
+
+const response: ApiResponse<User> = {
+  data: { id: 1, name: "Kylen" },
+  message: "success"
+};
+
+response.data.name.toUpperCase();`}</Code>
+        </Step>
+      </Steps>
+    </div>
+  </Frame>
+);
+
+const RuntimeValidation: Page = () => (
+  <Frame eyebrow="TYPESCRIPT / 08 / 回到剛才的 FETCH" title="API 回傳的資料，真的就是 User 嗎？" titleSize={72} section="RUNTIME BOUNDARY">
+    <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 56 }}>
+      <div>
+        <Code title="ASYNC 函式內的節錄 / 編譯時通過" language="TS" size={30}>{`interface User {
+  id: number;
+  name: string;
+}
+const user: User = await fetch("/api/user")
+  .then(res => res.json());
+user.name.toUpperCase();`}</Code>
+        <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>此處 res.json() 的型別是 any；標註 User 沒有驗證資料。</p>
+      </div>
+      <Steps>
+        <Step>
+          <div>
+            <Code title="API 實際回傳 / 合法 JSON" language="JSON" size={34}>{`{
+  "id": "ABC",
+  "name": null
+}`}</Code>
+            <div style={{ marginTop: 28 }}><Note tag="INTERFACE 已移除 / 不會驗證" title="null 無法使用這個方法。" /></div>
+          </div>
+        </Step>
+      </Steps>
+    </div>
+    <Strip style={{ marginTop: 26 }}>外部資料 → runtime schema validation → 再作為 User 使用</Strip>
+  </Frame>
+);
+
+const FullSessionRecap: Page = () => (
+  <Frame eyebrow="整場回顧 / 三個問題，三個責任" title="從執行順序，到資料進入系統的邊界。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36, marginTop: 8 }}>
+      <Process n="JAVASCRIPT" title="程式怎麼執行？">Event Loop<br />Promise<br />async / await</Process>
+      <Process n="TYPESCRIPT" title="執行前能知道什麼？">Type / 資料的 shape<br />Narrowing / 流程中的型別<br />Generic / 保留型別資訊</Process>
+      <Process n="RUNTIME BOUNDARY" title="外部資料符合型別嗎？" accent>Runtime validation<br />API response / localStorage<br />URL params / user input</Process>
+    </div>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 28 }}>邊界可用 Zod、JSON Schema validator 等做驗證；API contract 也需要實際落實檢查。</p>
+    <Strip style={{ marginTop: 30 }}>JavaScript 決定怎麼跑；TypeScript 在執行前描述與檢查資料的 shape。<br />外部資料進入系統時，仍需要 runtime validation。</Strip>
+  </Frame>
+);
+
 export const meta: SlideMeta = {
   title: 'Day 1｜JavaScript 執行與非同步 — Kylen',
   createdAt: '2026-09-15T03:11:44.021Z',
@@ -455,7 +657,7 @@ export const meta: SlideMeta = {
 // B: /Users/athena/Desktop/群組筆記/筆記/Source/Post/從 Callback 到 Promise 再到 async、await 的演進歷史.md
 export const notes: (string | undefined)[] = [
   "00:00–00:30｜30 秒\n開場：這次假設聽眾會寫後端程式，但沒寫過 JavaScript。不要求先認得 JS 的符號，也不一開始就考輸出順序。先看懂教材的函式，再把相依流程寫清楚，最後用 Event Loop 解釋執行時機。來源：使用者的受眾修正與兩份教材。",
-  "00:30–01:00｜30 秒\n交代三段路線：看懂 callback；整理相依非同步工作；回頭理解 Event Loop。共 35 分鐘，另外留 TS 20 分鐘與緩衝 5 分鐘。這是排練目標，現場互動使用緩衝時間。TS 內容未製作。",
+  "00:30–01:00｜30 秒\n交代三段路線：看懂 callback；整理相依非同步工作；回頭理解 Event Loop。共 35 分鐘，另外留 TS 20 分鐘與緩衝 5 分鐘。這是排練目標，現場互動使用緩衝時間。接著用 9 頁 TypeScript，把執行順序接到執行前的型別檢查。",
   "01:00–02:30｜1 分 30 秒\n來源 B 的 multiNum。只解讀本例必需的 JS 寫法，不擴充完整語法課：const 在這裡宣告名稱，等號右邊是一個函式；num 是參數；箭頭後面做乘法與輸出；console.log 可以理解成印出。提醒：宣告函式與呼叫函式是兩件事，這行先建立 multiNum，還沒印出數字。",
   "02:30–04:00｜1 分 30 秒\n來源 B 的 addNum 呼叫。強調參數不限於數字：multiNum 這個函式也能傳入。callback 是參數扮演的角色，不是特殊關鍵字。multiNum 沒有括號，代表把函式本身傳入；multiNum(8) 代表現在呼叫它。這個對照只是解讀原例，不引入額外的業務範例。",
   "04:00–05:30｜1 分 30 秒\n來源 B 的 addNum。接回上一頁已宣告的 multiNum，沿著 6 + 2 → 8 > 5 → callback(8) → multiNum(8) → 印 80 讀一次。a、b、callback 依序接到 6、2、multiNum。只講成立的分支；保留原稿 else 字串。這個例子同步呼叫 callback，callback 本身不等於非同步。",
@@ -475,7 +677,72 @@ export const notes: (string | undefined)[] = [
   "28:00–29:30｜1 分 30 秒\n來源 A Cards 與技術修正。Event Loop 是安排主執行緒後續工作的事件迴圈。這裡使用原稿簡化模型：目前 task 結束、Call Stack 清空，先清空 microtask，再執行下一個 task。FIFO 指各佇列內的處理，不宣稱所有 task 來源都有單一全域順序。microtask checkpoint 是這段清空流程的名稱，放在講者備註即可。",
   "29:30–32:00｜2 分 30 秒\n來源 A 完整四行程式。先補一個已成功完成的 Promise：Promise.resolve()。它的 then 仍然安排為 microtask，並非在這一行直接執行 callback。由上一頁向前進入，按右鍵逐一揭露：直接印 1；timer 安排稍後；then 安排 microtask；直接印 4；目前 script 結束，微任務印 3，再由 timer task 印 2。可讓聽眾一起解讀，不作成尚未教完的突襲測驗。",
   "32:00–33:30｜1 分 30 秒\n來源 A fetch 技術修正。fetch 是發送網路請求的 API，先回傳 Promise；網路工作本身不是 microtask，Promise 結果確定後的 then／await 後續才以 microtask 接續。先後規則不代表請求在下一次點擊前就完成。備用原稿 click 範例：button.addEventListener(\"click\", () => { state.user = user; Promise.resolve().then(() => { state.ready = true; }); }); 使用者點擊後先設定 user，再由微任務設定 ready。此例留在備註，不在主線加入 state 物件與事件 API 的額外閱讀負擔。microtask 也不能消除所有非同步資料競爭；取消、過期回應、順序控制此處不展開。",
-  "33:30–35:00｜1 分 30 秒\n用四個白話讀法結束：callback 傳要做的事，Promise 串後續成功或失敗，await 讀成等待本步結果，Event Loop 解釋執行順序。可口頭回問「multiNum 與 multiNum(8) 差在哪」「await 等待的是哪段程式」確認理解，不加入新例子。兩份教材中的細節收在講者備註，TS 20 分鐘與緩衝 5 分鐘保留。",
+  "33:30–35:00｜1 分 30 秒\n用四個白話讀法結束：callback 傳要做的事，Promise 串後續成功或失敗，await 讀成等待本步結果，Event Loop 解釋執行順序。可口頭回問「multiNum 與 multiNum(8) 差在哪」「await 等待的是哪段程式」確認理解，不加入新例子。兩份教材中的細節收在講者備註，TS 20 分鐘與緩衝 5 分鐘保留。轉場：剛才回答的是程式怎麼執行；接下來看執行前，我們能先檢查哪些資料假設。",
+  `35:00–37:00｜2 分鐘｜TypeScript 01
+核心：JavaScript 決定怎麼執行；TypeScript 在執行前增加 static type checking，最後仍以 JavaScript 執行。
+講法與讀碼：先用 15 秒接上一頁的執行順序，再指左邊 add 的兩個參數、回傳型別、return。對照右邊由上到下：型別註記移除，運算仍是 a + b。用 add("1", 2) 口頭說明會收到型別診斷，不必真的執行錯誤例子。最後指回 Event Loop、Call Stack、Promise、async / await、task / microtask：加上型別不改變這些執行機制。
+易誤解：不像 JVM／CLR 裡某些型別資訊會留在 runtime；本例的 annotation 不會生成參數驗證，也不會把字串轉成數字。compile time 在此泛指執行前的靜態檢查，編輯器也能即時做；轉出 JS 與是否執行型別檢查是可分開的工具步驟。型別錯誤不等於 runtime 已經替你阻止輸入。
+不延伸：不講編譯器架構、建置工具、tsconfig、降版輸出；也不把「所有 TS 語法都只會被刪掉」當成通則。本段只使用會被移除的型別語法。
+銜接：既然型別用來提前檢查，是不是每個地方都要自己寫？下一頁用同一個 add 回答。
+參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types`,
+  `37:00–38:30｜1 分 30 秒｜TypeScript 02
+核心：TypeScript 會從程式碼推斷型別，不需要每個位置都手動 annotation。
+講法與讀碼：由上到下看 name 的字串初值、age 的數字初值，再看 add 的 number 參數與 return a + b。問「沒有寫回傳型別，是否代表 any？」短停後指出推斷結果仍是 number，這就叫 type inference。
+易誤解：此處 const name 精確推斷為 "Kylen"、age 為 20，是 string／number 的 literal type；不要把編輯器顯示的精確型別說錯。只花約 15 秒說它保留了更精確的已知值。普通獨立函式的參數不會只因後面有呼叫就自動回推，所以本例保留參數 annotation。此片段視為模組中的程式碼，不混入瀏覽器全域 name 宣告衝突。
+不延伸：不教 widening、as const、完整 primitive type 或 contextual typing；不主張一律刪除回傳型別，公開 API 仍可明確標示契約。
+銜接：推斷不只處理單一值，也會看 object 的欄位；下一頁問一個沒有宣告 User 身分的物件能不能傳入。
+參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types`,
+  `38:30–41:30｜3 分鐘｜TypeScript 03
+核心：TypeScript 主要比較 shape 的相容性，不要求 nominal identity。
+講法與讀碼：先用約 40 秒讀左欄 interface User 的 id、name，再讀 printUser 的輸入與實際使用的 name。接著讀右欄 data 的三個欄位，停在 printUser(data) 問標題問題。逐一配對 id: number、name: string，約 60 秒解釋符合函式要求就能傳入；多出的 email 不妨礙這個既有變數相容。最後給名稱 structural typing，用剩餘時間對照 Java／C# 常見的 interface nominal identity：通常需要類別正式宣告實作關係。
+易誤解：User 描述「至少需要哪些結構」，不是 object 必須正式屬於某個類別；欄位的型別也要相容，不只是名稱一樣。傳入時沒有複製、轉型或刪掉 email；在 printUser 內只知道 User 描述的成員。此處不是 runtime duck typing 的自動檢查。
+邊界提醒：直接寫 printUser({ id: 1, name: "Kylen", email: "..." }) 這種新鮮 object literal 會觸發 excess property checking；因此保留 data 變數版，口頭配合頁底提醒，不示範繞過檢查。
+不延伸：不講 class、private／protected 例外、branding、soundness 或語言理論；比較限於 Java／C# 常見的 interface 相容性，不泛指所有後端語言。
+銜接：shape 描述需要哪些欄位；但某個值本身可能有不只一種型別，下一頁看 ID。
+參考：https://www.typescriptlang.org/docs/handbook/type-compatibility.html`,
+  `41:30–43:00｜1 分 30 秒｜TypeScript 04
+核心：union 表達多種可能；在還沒區分前，操作必須對目前每一種可能都成立。
+講法與讀碼：先读 printId 的 id: string | number，將 | 讀成「或」；再讀 console.log 與下面兩次呼叫，指出字串和數字都符合。先不背功能名稱，理解需求後再指出 union type。最後按右鍵揭露黄色問題：如果改用 id.toUpperCase() 會怎樣？停 5 秒，回答數字不保證有這個方法，因此靜態檢查會擋下。
+易誤解：不是把值同時轉成兩種型別，不是 runtime 的 | 位元運算，也不等同 any；TypeScript 仍保留這兩種可能，並約束可用操作。console.log 同時能接受字串與數字，所以本頁程式有效。
+不延伸：不加第三種型別、overload 或複雜 union；不以 type assertion 強行消除錯誤。
+銜接：與其要求 TS 相信我們，下一頁使用真的 JavaScript 判斷，確定現在進到哪個分支。
+參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types`,
+  `43:00–45:30｜2 分 30 秒｜TypeScript 05
+核心：TypeScript 會依 JavaScript control flow 追蹤這一行仍可能有哪些型別，這就是 narrowing。
+講法與讀碼：由函式入口的 string | number 往下讀 typeof id === "string"。停在 if 內，問「這裡還可能是 number 嗎？」按一次右鍵揭露第一個說明：只剩 string，所以 toUpperCase 成立。再讀 else，按第二次右鍵：排除 string 後只剩 number。最後讀黃色結論，對照前半場追蹤執行時序、現在追蹤每一行可能的型別。
+易誤解：typeof 是會保留並實際執行的 JS 程式；TypeScript 在執行前分析這個條件帶來的型別資訊。narrowing 不是型別轉換，不是跑到這一行才啟動 TS 編譯器，也不是把函式參數的整體宣告永遠改成 string。
+不延伸：不加自訂 type guard、discriminated union、exhaustiveness 或 typeof null 陷阱；只用已知的 string／number 兩條路徑。
+銜接：現在已經能描述 shape、可能性與分支；下一頁整理替這些型別命名的兩種常見寫法。
+參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html`,
+  `45:30–47:30｜2 分鐘｜TypeScript 06
+核心：一般 object shape 多半能用 interface 或 type；依要表達的內容理解差異，不爭哪個比較好。
+講法與讀碼：先比較兩欄最上方相同的 id／name，左邊 interface User、右邊 type User = { ... }，說兩欄是替代方案，不要貼在同一個作用域重複宣告。接著左欄往下讀 Admin extends User，表示保留 User 欄位再加 permissions；string[] 只讀成字串陣列。補一句 interface 支援同名 declaration merging。右欄接著讀 ID 的 union，再讀 Status 的三個合法字串值，說 type 能為 union 與 intersection 等型別組合命名。
+易誤解：interface 的 extends 在這裡擴充型別描述，不產生 runtime 繼承物件；type 也能描述 object，並非只有 interface 能用在物件。type alias 本身不支援同名 declaration merging。不要因為使用 interface 就推論它有 runtime 身分或 API 驗證能力。
+不延伸：不現場示範 merging、intersection 語法細節、團隊風格辯論或完整比較表；Status 只用來延續 union，不擴充狀態機教學。
+銜接：假設團隊用 interface 描述 API 的包裝，裡面 data 每個 endpoint 都不同，要怎麼保留它的型別？
+參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces`,
+  `47:30–50:00｜2 分 30 秒｜TypeScript 07
+核心：泛型保留可替換的型別位置，讓共同結構重用時不丟掉內部資料的型別。
+講法與讀碼：先用約 40 秒讀左側 ApiResponse 的 data: any 與 message，指出 any 讓 data.naem 拼錯也不報錯。按右鍵揭露右邊替代版本，從 ApiResponse<T> 的 T 一路對到 data: T。再讀 response: ApiResponse<User>：把這個位置填成 User。User 沿用前面的 interface，id 是 number、name 是 string；看 data 的兩個值、message，再到最後 name.toUpperCase()，這時仍保有 string 的型別資訊。最後用一句話把泛型連到聽眾熟悉的容器型別。
+易誤解：左右兩個 ApiResponse 是改寫前後，並非要同時宣告。T 是型別參數，不是呼叫時傳入的 runtime 變數；寫 ApiResponse<User> 不會建立或驗證 User。any 也不是「會安全接受所有型別」的保證，而是放寬這個位置的檢查。此頁 data 是自己在程式碼中建立，與外部 JSON 的信任程度不同。
+不延伸：不講 conditional type、infer、複雜 generic constraints、variance 或泛型函式大全。
+銜接：自己建立的 data 能檢查；如果 data 是網路回來的，我們標上 User 就真的安全了嗎？下一頁回到前半場的 fetch。
+參考：https://www.typescriptlang.org/docs/handbook/2/generics.html`,
+  `50:00–53:00｜3 分鐘｜TypeScript 08
+核心：TypeScript ≠ runtime validation；型別註記不能保證外部世界真的符合它。
+講法與讀碼：先讀 User 的 id／name，再讀 async 函式內的 fetch、then、res.json()、await，接回前半場：Promise 完成後繼續，不改變 task／microtask 機制。約 50 秒後停在 user.name.toUpperCase()，問 API 是否一定符合宣告。按右鍵揭露實際 JSON，由 id 的字串讀到 name 的 null；JSON 語法有效但 shape 不符合 User，最後一行 runtime 會拋 TypeError。再花約 60 秒解释 res.json() 的標準 DOM 型別是 Promise<any>，any 可被指派成 User，因此這段程式靜態檢查通過；加 annotation 沒有做任何 runtime 檢查，也沒有轉換資料。
+易誤解：若在程式碼直接把這份錯誤物件指派給 User，TS 本來能指出不一致；本例漏洞在外部資料與 any。不要教成 TS 對 null 或欄位型別一概無能為力。改寫成 as User 也不會補上驗證，不需要另教斷言語法。
+落地：外部資料先經可執行的 schema validation，通過後才當 User 使用，失敗就拒絕或處理錯誤。API response、localStorage、URL params、user input 都是邊界；可簡提 Zod 或 JSON Schema validator。API contract 文件、schema 本身、產生的 TS 型別都不等於驗證已經執行。
+不延伸：不做 Zod 教學、不加 HTTP 錯誤處理支線、不講驗證工具比較；講者若被問到 unknown，可口頭說它要求先檢查再使用，留待 Q&A。
+銜接：把 runtime 執行、static checking、外部資料邊界分成三個問題，最後一頁收回整場。
+參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types
+參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any`,
+  `53:00–55:00｜2 分鐘｜TypeScript 09
+核心：JS 管執行；TS 在執行前描述與檢查 shape；外部資料的可信度由 runtime validation 建立。
+講法與讀圖：本頁沒有新程式碼，依三欄從左到右、各欄由上往下讀。左欄用約 25 秒回顧 Event Loop、Promise、async／await，回答怎麼執行。中欄用約 30 秒回顧型別、narrowing、generic，回答執行前能知道什麼。右欄約 25 秒回到 API response、localStorage、URL params、user input，回答外部資料是否符合型別。指向頁底工具名稱只作定位，不教語法。
+易誤解：三欄是互補的責任，不是所有程式都必須依左到右跑過三個階段；static checking 與 runtime validation 不能互相取代。API contract 必須有實際檢查機制，才有對應的 runtime 保證。
+不延伸：不加新 feature、工具安裝或語法補遺。用剩下約 40 秒口頭回問「加上 TypeScript 會改變 1 → 4 → 3 → 2 嗎？」「API JSON 標上 User，就已經驗證了嗎？」各等幾秒後給答案。
+收尾銜接：讀黃色結論，55:00 結束教學，剩餘 5 分鐘留給原本安排的緩衝／Q&A。第三部分合计 20 分鐘，互動停頓已計入各頁預算。`,
 ];
 
 export default [
@@ -483,4 +750,6 @@ export default [
   MainThread, DependentWork, CallbackHell, PromiseMeaning, PromiseResolve,
   ReadThen, PromiseChain, PromiseFailure, AwaitCompare, AsyncAwait,
   AwaitMeaning, TwoQueues, LoopRule, OrderAnswer, FetchBoundary, Recap,
+  TypeScriptBoundary, TypeInference, StructuralTyping, UnionType, TypeNarrowing,
+  InterfaceAndType, GenericResponse, RuntimeValidation, FullSessionRecap,
 ] satisfies Page[];

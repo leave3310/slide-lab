@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import { Step, Steps, useSlidePageNumber } from '@open-slide/core';
 import type { DesignSystem, Page, SlideMeta, SlideTransition } from '@open-slide/core';
+import callbackHellImage from './assets/callback-hell.png';
 
 export const design: DesignSystem = {
   palette: { bg: '#F5F3EB', text: '#252620', accent: '#F1D54A' },
@@ -99,37 +100,33 @@ const Process = ({ n, title, children, accent = false }: { n: string; title: str
 );
 
 // The teaching order introduces functions and Promise before using them to explain the event loop.
-// All examples are excerpts or annotated adaptations of the two supplied notes.
+// JavaScript examples adapt the two supplied notes; TypeScript and async trace examples support this workshop.
 const Cover: Page = () => (
   <section style={root}>
     <div style={{ position: 'absolute', top: 128, left: 120, ...label, color: muted }}>DAY 01 / 給初次接觸 JS 的後端工程師 / KYLEN</div>
     <div aria-hidden="true" style={{ position: 'absolute', top: 270, right: 120, width: 260, height: 420, background: yellow, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: 24, boxSizing: 'border-box', fontFamily: mono, fontSize: 110, fontWeight: 800, color: '#252620' }}>JS</div>
-    <h1 style={{ position: 'absolute', top: 298, left: 120, margin: 0, fontFamily: 'var(--osd-font-display)', fontSize: 'var(--osd-size-hero)', fontWeight: 850, lineHeight: 1.15, letterSpacing: -5 }}>JavaScript<br />執行與非同步</h1>
-    <p style={{ position: 'absolute', left: 126, top: 742, margin: 0, fontSize: 36, lineHeight: 1.5, color: muted }}>從看懂一個函式，到理解非同步程式的執行順序。</p>
+    <h1 style={{ position: 'absolute', top: 298, left: 120, maxWidth: 1350, margin: 0, fontFamily: 'var(--osd-font-display)', fontSize: 'var(--osd-size-hero)', fontWeight: 850, lineHeight: 1.15, letterSpacing: -5 }}>JavaScript 執行<br />TypeScript 型別</h1>
+    <p style={{ position: 'absolute', left: 126, top: 742, margin: 0, fontSize: 36, lineHeight: 1.5, color: muted }}>從非同步流程與執行順序，到執行前的資料型別檢查。</p>
     <Footer section="從 Event Loop 到 TypeScript" />
   </section>
 );
 
 const Agenda: Page = () => (
-  <Frame eyebrow="今天的路線" title="你已經會寫程式，先接上 JS 的寫法。" titleSize={72}>
+  <Frame eyebrow="今天的路線" title="從怎麼寫、何時執行，到執行前的檢查。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 20 }}>
-      <Process n="01 / 先看懂" title="函式怎麼傳？">從參數、呼叫，<br />讀懂 callback。</Process><Arrow />
-      <Process n="02 / 再整理" title="下一步怎麼接？">從巢狀 callback，<br />到 Promise、await。</Process><Arrow />
-      <Process n="03 / 最後追蹤" title="什麼時候執行？" accent>用已經看懂的程式，<br />理解 Event Loop。</Process>
+      <Process n="01 / 非同步流程" title="非同步流程怎麼寫？">Callback / Promise<br />async / await</Process><Arrow />
+      <Process n="02 / 執行順序" title="程式何時執行？">Event Loop<br />task / microtask</Process><Arrow />
+      <Process n="03 / 型別檢查" title="執行前能檢查什麼？" accent>TypeScript<br />資料的 shape 與型別</Process>
     </div>
-    <Strip style={{ marginTop: 58 }}>本段約 35 分鐘 · TypeScript 預留 20 分鐘 · 緩衝 5 分鐘</Strip>
+    <Strip style={{ marginTop: 58 }}>前兩部分約 35 分鐘 · TypeScript 約 20 分鐘 · 緩衝 5 分鐘</Strip>
   </Frame>
 );
 
 const ReadFunction: Page = () => (
   <Frame eyebrow="01 / 先看懂函式" title="這個函式：收一個數字，印出它的十倍。" titleSize={70} section="讀懂範例">
     <Code title="教材的 multiNum 函式" size={40}>{`const multiNum = (num) => console.log(num * 10);`}</Code>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 48, marginTop: 46 }}>
-      <Note tag="const multiNum =" title="替函式取名">把這個函式存到<br />multiNum 這個名稱。</Note>
-      <Note tag="(num) => ..." title="輸入與要做的事">num 是參數；<br />箭頭後面是函式內容。</Note>
-      <Note tag="console.log(...)" title="把值印出來">在這裡可以理解成<br />「印出 num × 10」。</Note>
-    </div>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 30 }}>這裡的 =&gt; 是「箭頭函式」寫法；先讀成「收到 num，就做後面的事」。</p>
+    <Strip style={{ marginTop: 56 }}>箭頭函式的讀法：收到 num → 印出 num × 10。</Strip>
+    <p style={{ ...body, color: muted, marginTop: 36 }}>這一行先建立函式；呼叫 multiNum(8) 時，才會印出 80。</p>
   </Frame>
 );
 
@@ -137,22 +134,22 @@ const PassFunction: Page = () => (
   <Frame eyebrow="01 / CALLBACK 是什麼" title="函式也能當參數：把要做的事傳進去。" titleSize={70} section="CALLBACK">
     <Code title="先看呼叫端" size={48}>{`addNum(6, 2, multiNum);`}</Code>
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, marginTop: 50 }}>
-      <Note tag="6、2" title="前兩個參數是數字">交給 addNum 做加法。</Note>
-      <Note tag="multiNum" title="第三個參數是一個函式">交給 addNum 決定何時呼叫。<br />這個角色就叫 callback（回呼）。</Note>
+      <Note tag="multiNum" title="把函式傳過去">這裡交給 addNum，<br />由它決定何時呼叫。</Note>
+      <Note tag="multiNum(8)" title="現在呼叫函式">立刻印出 80。<br />這是另一個動作。</Note>
     </div>
-    <Strip style={{ marginTop: 28 }}>multiNum：把函式傳過去　／　multiNum(8)：現在呼叫它</Strip>
+    <Strip style={{ marginTop: 28 }}>callback（回呼）：傳進去、讓對方在需要時呼叫的函式。</Strip>
   </Frame>
 );
 
 const CallbackTrace: Page = () => (
-  <Frame eyebrow="01 / 沿著一次呼叫看" title="加完、判斷完，再呼叫傳進來的函式。" titleSize={70} section="CALLBACK">
+  <Frame eyebrow="01 / 沿著一次呼叫看" title="這次 callback(8)，就是呼叫 multiNum(8)。" titleSize={70} section="CALLBACK">
     <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 64 }}>
       <Code size={34} title="callback 參數會接到剛才的 multiNum">{`const addNum = (a, b, callback) => {
   const plusNum = a + b;
   if (plusNum > 5) {
     callback(plusNum);
   } else {
-    console.log('the plusNum < 5');
+    console.log('the plusNum <= 5');
   }
 };
 addNum(6, 2, multiNum);`}</Code>
@@ -199,7 +196,7 @@ const MainThread: Page = () => (
 );
 
 const DependentWork: Page = () => (
-  <Frame eyebrow="02 / 你熟悉的相依流程" title="第二步，要用第一步的結果。" section="相依工作">
+  <Frame eyebrow="01 / 你熟悉的相依流程" title="第二步，要用第一步的結果。" section="相依工作">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 20 }}>
       <Process n="doSomething" title="第一步">取得 result。</Process><Arrow />
       <Process n="doSomethingElse" title="第二步">使用 result，<br />產生 newResult。</Process><Arrow />
@@ -211,8 +208,8 @@ const DependentWork: Page = () => (
 );
 
 const CallbackHell: Page = () => (
-  <Frame eyebrow="02 / CALLBACK：把下一步放進去" title="完成第一步後，再做第二步、第三步。" titleSize={72} section="CALLBACK">
-    <Code size={32} title="讀法：每一層函式，都是上一步完成後要做的事">{`doSomething(function (result) {
+  <Frame eyebrow="01 / CALLBACK：把下一步放進去" title="完成第一步後，再做第二步、第三步。" titleSize={72} section="CALLBACK">
+    <Code size={32} title="原版 API：成功與失敗都透過 callback 通知">{`doSomething(function (result) {
   doSomethingElse(result, function (newResult) {
     doThirdThing(newResult, function (finalResult) {
       console.log(\`Got the final result: \${finalResult}\`);
@@ -226,46 +223,38 @@ const CallbackHell: Page = () => (
   </Frame>
 );
 
-const PromiseMeaning: Page = () => (
-  <Frame eyebrow="02 / PROMISE 是什麼" title="先拿到 Promise，再接續處理工作的結果。" titleSize={68} section="PROMISE">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, marginTop: 16 }}>
-      <div style={{ background: surface, padding: 40, minHeight: 344, boxSizing: 'border-box' }}>
-        <div style={{ ...label, color: muted }}>呼叫端現在拿到</div>
-        <h2 style={{ fontSize: 72, margin: '28px 0' }}>Promise</h2>
-        <p style={body}>一個表示工作結果的物件。<br />結果可能還在等待中。</p>
-      </div>
-      <div style={{ borderTop: `4px solid ${ink}`, paddingTop: 40 }}>
-        <div style={{ ...label, color: muted }}>接下來怎麼用</div>
-        <h2 style={{ fontSize: 48, lineHeight: 1.35, margin: '28px 0' }}>成功拿到值 → .then()<br />發生錯誤 → .catch()</h2>
-        <p style={body}>把後續工作，接在 Promise 上。</p>
-      </div>
-    </div>
-    <Strip style={{ marginTop: 56 }}>例如：doSomething() 先回傳 Promise，完成時才提供網址字串。</Strip>
+const CallbackHellVisual: Page = () => (
+  <Frame eyebrow="01 / CALLBACK HELL：當巢狀越來越深" title="下一步一直往裡面接，就會長成這樣。" titleSize={72} section="CALLBACK HELL">
+    <img
+      src={callbackHellImage}
+      alt="多層 callback 一路向右縮排，形成金字塔形狀；左側搭配角色發出波動拳的趣味圖片。"
+      width={721}
+      height={420}
+      style={{ display: 'block', height: 520, width: 'auto', maxWidth: '100%', objectFit: 'contain', borderRadius: 'var(--osd-radius)', margin: '0 auto' }}
+    />
+    <Strip style={{ marginTop: 28 }}>Callback Hell：巢狀越深，流程與錯誤處理越難追。</Strip>
   </Frame>
 );
 
-const PromiseResolve: Page = () => (
-  <Frame eyebrow="02 / 誰提供完成的結果" title="resolve：告訴 Promise「成功了，值是這個」。" titleSize={64} section="PROMISE">
-    <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 64 }}>
-      <Code size={34} title="function doSomething() 宣告一個名叫 doSomething 的函式">{`function doSomething() {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log("Did something");
-      resolve("https://example.com/");
-    }, 200);
-  });
-}`}</Code>
-      <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
-        <Note tag="return new Promise(...)" title="先回傳 Promise">裡面的函式用來安排工作。</Note>
-        <Note tag="resolve(網址)" title="成功時提供網址">resolve 是 Promise<br />提供的函式。</Note>
-      </div>
+const PromiseMeaning: Page = () => (
+  <Frame eyebrow="01 / PROMISE 是什麼" title="同一個工作，API 改成回傳 Promise。" titleSize={68} section="PROMISE">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, marginTop: 16 }}>
+      <Code title="原版 / 接收成功與失敗 callback" size={32}>{`doSomething(
+  successCallback,
+  failureCallback
+);`}</Code>
+      <Code title="改寫後 / 回傳 Promise" size={32}>{`const promise = doSomething();
+promise
+  .then(successCallback)
+  .catch(failureCallback);`}</Code>
     </div>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 24 }}>這裡用 200 毫秒的計時器示意一段需要等待的工作。</p>
+    <p style={{ ...body, marginTop: 36 }}>Promise 是表示工作結果的物件；結果可能還在等待中。</p>
+    <Strip style={{ marginTop: 36 }}>doSomething／doSomethingElse／doThirdThing：後續都使用 Promise 版本。</Strip>
   </Frame>
 );
 
 const ReadThen: Page = () => (
-  <Frame eyebrow="02 / 先看一個 .then()" title="then 裡的函式，收到上一步成功的結果。" titleSize={68} section="PROMISE">
+  <Frame eyebrow="01 / 先看一個 .then()" title="then 裡的函式，收到上一步成功的結果。" titleSize={68} section="PROMISE">
     <Code size={42} title="從完整 Promise chain 抽出第一段">{`doSomething()
   .then(function (result) {
     return doSomethingElse(result);
@@ -277,10 +266,30 @@ const ReadThen: Page = () => (
   </Frame>
 );
 
+const PromiseResolve: Page = () => (
+  <Frame eyebrow="01 / 誰提供完成的結果" title="resolve：告訴 Promise「成功了，值是這個」。" titleSize={64} section="PROMISE">
+    <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 64 }}>
+      <Code size={34} title="改寫後的 API：回傳 Promise 的 doSomething">{`function doSomething() {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log("Did something");
+      resolve("https://example.com/");
+    }, 200);
+  });
+}`}</Code>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
+        <Note tag="new Promise(...)" title="立即安排計時">內部函式現在執行；<br />安排後才回傳 Promise。</Note>
+        <Note tag="resolve(網址)" title="稍後提供成功值">計時器 callback 執行時，<br />才提供網址字串。</Note>
+      </div>
+    </div>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 24 }}>這裡用 200 毫秒的計時器示意一段需要等待的工作。</p>
+  </Frame>
+);
+
 const PromiseChain: Page = () => (
-  <Frame eyebrow="02 / 把同一個流程攤平" title="用 return 接上下一步，結果就能往下傳。" titleSize={70} section="PROMISE">
+  <Frame eyebrow="01 / 把同一個流程攤平" title="用 return 接上下一步，結果就能往下傳。" titleSize={70} section="PROMISE">
     <div style={{ display: 'grid', gridTemplateColumns: '1190px 1fr', gap: 56 }}>
-      <Code size={30} title="每一段 .then() 都沿用上一頁的讀法">{`doSomething()
+      <Code size={30} title="三個 API 都回傳 Promise，沿用剛才 .then() 的讀法">{`doSomething()
   .then(function (result) {
     return doSomethingElse(result);
   })
@@ -300,7 +309,7 @@ const PromiseChain: Page = () => (
 );
 
 const PromiseFailure: Page = () => (
-  <Frame eyebrow="02 / 如果中途失敗呢" title="跳過後面的成功處理，交給 catch。" section="PROMISE">
+  <Frame eyebrow="01 / 如果中途失敗呢" title="跳過後面的成功處理，交給 catch。" section="PROMISE">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 18 }}>
       <Process n="假設第二步" title="發生錯誤">doSomethingElse<br />沒有成功完成。</Process><Arrow />
       <Process n="後續成功 callback" title="先跳過">不執行第三步，<br />也不印成功的結果。</Process><Arrow />
@@ -311,7 +320,7 @@ const PromiseFailure: Page = () => (
 );
 
 const AwaitCompare: Page = () => (
-  <Frame eyebrow="02 / ASYNC、AWAIT 改善哪裡" title="同樣等上一步，但可以由上往下讀。" titleSize={72} section="ASYNC / AWAIT">
+  <Frame eyebrow="01 / ASYNC、AWAIT 改善哪裡" title="同樣等上一步，但可以由上往下讀。" titleSize={72} section="ASYNC / AWAIT">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
       <Code size={30} title="用 .then() 接下一步">{`doSomething()
   .then(function (result) {
@@ -331,9 +340,9 @@ const newResult =
 );
 
 const AsyncAwait: Page = () => (
-  <Frame eyebrow="02 / 加回完整的成功與失敗流程" title="try 寫正常步驟，catch 接住錯誤。" section="ASYNC / AWAIT">
+  <Frame eyebrow="01 / 加回完整的成功與失敗流程" title="try 寫正常步驟，catch 接住錯誤。" section="ASYNC / AWAIT">
     <div style={{ display: 'grid', gridTemplateColumns: '1190px 1fr', gap: 56 }}>
-      <Code size={30} title="async function foo()：宣告這個非同步函式">{`async function foo() {
+      <Code size={30} title="async function foo()：呼叫後回傳 Promise">{`async function foo() {
   try {
     const result = await doSomething();
     const newResult = await doSomethingElse(result);
@@ -352,25 +361,34 @@ const AsyncAwait: Page = () => (
 );
 
 const AwaitMeaning: Page = () => (
-  <Frame eyebrow="02 / 等待的是誰" title="await 等待結果，主執行緒仍能處理其他工作。" titleSize={64} section="ASYNC / AWAIT">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, marginTop: 12 }}>
-      <div style={{ background: surface, padding: 40, minHeight: 344, boxSizing: 'border-box' }}>
-        <div style={{ ...label, color: muted }}>目前這個 async 函式</div>
-        <h2 style={{ fontSize: 52, lineHeight: 1.3, margin: '28px 0' }}>後面的步驟<br />等結果回來再繼續。</h2>
-        <p style={{ ...body, fontSize: 32 }}>例如：第二步需要第一步的 result。</p>
+  <Frame eyebrow="01 / 等待的是誰" title="await 暫停 foo 的後續，呼叫端呢？" titleSize={72} section="ASYNC / AWAIT">
+    <div style={{ display: 'grid', gridTemplateColumns: '1060px 1fr', gap: 64 }}>
+      <div>
+        <Code size={34} title="一起追蹤 foo 與呼叫端">{`async function foo() {
+  console.log("A");
+  await Promise.resolve();
+  console.log("C");
+}
+const work = foo();
+console.log("B");`}</Code>
+        <p style={{ ...body, fontSize: 30, color: muted, marginTop: 20 }}>Promise.resolve()：已成功完成的 Promise。</p>
       </div>
-      <div style={{ borderTop: `4px solid ${ink}`, paddingTop: 40 }}>
-        <div style={{ ...label, color: muted }}>瀏覽器主執行緒</div>
-        <h2 style={{ fontSize: 52, lineHeight: 1.3, margin: '28px 0' }}>等待期間，<br />可以接續其他工作。</h2>
-        <p style={{ ...body, fontSize: 32 }}>不用停住整個 JavaScript 執行緒。</p>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 24 }}>
+        <Steps>
+          <Step><QueueItem>A / 先進入 foo<br />同步執行到 await。</QueueItem></Step>
+          <Step><QueueItem>B / 呼叫端繼續<br />work 是 Promise。</QueueItem></Step>
+          <Step>
+            <QueueItem accent>C / 稍後接續 foo<br />已完成也不會立即接續。</QueueItem>
+            <Strip style={{ marginTop: 24, fontFamily: mono, fontSize: 44 }}>A → B → C</Strip>
+          </Step>
+        </Steps>
       </div>
     </div>
-    <Strip style={{ marginTop: 56 }}>async / await 沿用 Promise 機制，把相同流程改成較好讀的寫法。</Strip>
   </Frame>
 );
 
 const TwoQueues: Page = () => (
-  <Frame eyebrow="03 / 現在來看：誰先執行" title="準備好的後續程式，會進入不同的佇列。" titleSize={70} section="EVENT LOOP">
+  <Frame eyebrow="02 / 現在來看：誰先執行" title="準備好的後續程式，會進入不同的佇列。" titleSize={70} section="EVENT LOOP">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56 }}>
       <div>
         <div style={{ ...label, color: muted }}>TASK / 任務（也常稱 MACROTASK）</div>
@@ -385,7 +403,7 @@ const TwoQueues: Page = () => (
           <QueueItem accent>.then() 裡的 callback</QueueItem>
           <QueueItem accent>await 後面的程式</QueueItem>
         </div>
-        <p style={{ ...body, fontSize: 32, color: muted, marginTop: 30 }}>對應的 Promise 結果確定後，<br />才安排這些後續程式。</p>
+        <p style={{ ...body, fontSize: 32, color: muted, marginTop: 30 }}>上一頁印出 C，就是 await 的後續。<br />Promise 結果確定後，安排為 microtask。</p>
       </div>
     </div>
     <p style={{ ...body, fontSize: 32, color: muted, marginTop: 44 }}>佇列（queue）：放著準備好、等待執行的工作。</p>
@@ -393,7 +411,7 @@ const TwoQueues: Page = () => (
 );
 
 const LoopRule: Page = () => (
-  <Frame eyebrow="03 / EVENT LOOP：安排接下來的執行" title="目前的 task 結束，先清空 microtask。" titleSize={72} section="EVENT LOOP">
+  <Frame eyebrow="02 / EVENT LOOP：安排接下來的執行" title="目前的 task 結束，先清空 microtask。" titleSize={72} section="EVENT LOOP">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 22 }}>
       <Process n="01 / 先做完現在這段" title="目前的 task">例如：目前這段 script。<br />等 Call Stack 清空。</Process><Arrow />
       <Process n="02 / 接著處理" title="Microtask" accent>把已排入的微任務做完，<br />直到佇列清空。</Process><Arrow />
@@ -405,7 +423,7 @@ const LoopRule: Page = () => (
 );
 
 const OrderAnswer: Page = () => (
-  <Frame eyebrow="03 / 把剛才的觀念合起來" title="現在，一起讀懂 1 → 4 → 3 → 2。" section="EVENT LOOP">
+  <Frame eyebrow="02 / 把剛才的觀念合起來" title="現在，一起讀懂 1 → 4 → 3 → 2。" section="EVENT LOOP">
     <Code size={32} title="Promise.resolve()：取得一個已成功完成的 Promise">{`console.log("1");
 setTimeout(() => console.log("2"), 0);
 Promise.resolve().then(() => console.log("3"));
@@ -422,7 +440,7 @@ console.log("4");`}</Code>
 );
 
 const FetchBoundary: Page = () => (
-  <Frame eyebrow="03 / 換成網路請求時" title="fetch 負責發請求，Promise 接續處理結果。" titleSize={66} section="EVENT LOOP">
+  <Frame eyebrow="02 / 換成網路請求時" title="fetch 負責發請求，Promise 接續處理結果。" titleSize={66} section="EVENT LOOP">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 24 }}>
       <Process n="fetch()" title="發出網路請求">回傳 Promise，<br />網路工作由瀏覽器處理。</Process><Arrow />
       <Process n="Promise 結果確定" title="有結果可處理">安排對應的後續程式。</Process><Arrow />
@@ -434,7 +452,7 @@ const FetchBoundary: Page = () => (
 );
 
 const Recap: Page = () => (
-  <Frame eyebrow="回顧 / 帶走這四個讀法" title="下次看到這些寫法，就知道在處理什麼。" titleSize={70}>
+  <Frame eyebrow="02 / JAVASCRIPT 回顧" title="下次看到這些寫法，就知道在處理什麼。" titleSize={70}>
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '44px 72px' }}>
       <Note tag="CALLBACK" title="把接下來要做的事，傳給別人。">看誰會呼叫這個函式。</Note>
       <Note tag="PROMISE" title="把成功與失敗的後續接起來。">看 .then() 怎麼回傳、.catch() 怎麼處理。</Note>
@@ -447,7 +465,7 @@ const Recap: Page = () => (
 
 // Part 3: nine questions, 20 minutes. Reuse the runtime model; add static checking.
 const TypeScriptBoundary: Page = () => (
-  <Frame eyebrow="PART 3 / TYPESCRIPT / 01" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
+  <Frame eyebrow="03 / TYPESCRIPT 01 / 執行前的型別檢查" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 64px 1fr', gap: 24, alignItems: 'center' }}>
       <Code title="執行前 / STATIC TYPE CHECKING" language="TS" size={30}>{`function add(a: number, b: number): number {
   return a + b;
@@ -466,16 +484,16 @@ const TypeScriptBoundary: Page = () => (
 );
 
 const TypeInference: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 02 / 從程式碼看得出來的事" title="每個地方，都要手動標型別嗎？" section="TYPE INFERENCE">
+  <Frame eyebrow="03 / TYPESCRIPT 02 / 從程式碼看得出來的事" title="每個地方，都要手動標型別嗎？" section="TYPE INFERENCE">
     <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 64 }}>
-      <Code title="只標明函式的輸入" language="TS" size={36}>{`const name = "Kylen";
-const age = 20;
+      <Code title="只標明函式的輸入" language="TS" size={36}>{`let userName = "Kylen";
+let age = 20;
 
 function add(a: number, b: number) {
   return a + b;
 }`}</Code>
       <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
-        <Note tag="① 從初始值推斷 / LITERAL TYPE" title="const 保留更精確的型別。">name → "Kylen"（string）<br />age → 20（number）</Note>
+        <Note tag="① 從初始值推斷" title="初始值已經提供線索。">userName → string<br />age → number</Note>
         <Note tag="② 從 return 推斷" title="add 的回傳型別 → number">兩個 number 相加，結果也是 number。</Note>
       </div>
     </div>
@@ -484,7 +502,7 @@ function add(a: number, b: number) {
 );
 
 const StructuralTyping: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 03 / 後端工程師最需要換的視角" title="沒有 implements User，為什麼也能傳入？" titleSize={68} section="STRUCTURAL TYPING">
+  <Frame eyebrow="03 / TYPESCRIPT 03 / 後端工程師最需要換的視角" title="沒有 implements User，為什麼也能傳入？" titleSize={68} section="STRUCTURAL TYPING">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
       <Code title="函式需要的結構 / SHAPE" language="TS" size={32}>{`interface User {
   id: number;
@@ -509,7 +527,7 @@ printUser(data); // OK`}</Code>
 );
 
 const UnionType: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 04 / 同一個輸入有兩種可能" title="ID 可能是字串，也可能是數字，怎麼寫？" titleSize={70} section="UNION TYPE">
+  <Frame eyebrow="03 / TYPESCRIPT 04 / 同一個輸入有兩種可能" title="ID 可能是字串，也可能是數字，怎麼寫？" titleSize={70} section="UNION TYPE">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
       <Code title="先把可能性寫出來" language="TS" size={36}>{`function printId(id: string | number) {
   console.log(id);
@@ -526,7 +544,7 @@ printId(12);`}</Code>
 );
 
 const TypeNarrowing: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 05 / 先判斷，再使用" title="進到這個分支，id 還可能是數字嗎？" titleSize={72} section="NARROWING">
+  <Frame eyebrow="03 / TYPESCRIPT 05 / 先判斷，再使用" title="進到這個分支，id 還可能是數字嗎？" titleSize={72} section="NARROWING">
     <div style={{ display: 'grid', gridTemplateColumns: '1050px 1fr', gap: 64 }}>
       <Code title="沿著 JavaScript 的 control flow 往下讀" language="TS" size={34}>{`function printId(id: string | number) {
   if (typeof id === "string") {
@@ -548,36 +566,31 @@ const TypeNarrowing: Page = () => (
 );
 
 const InterfaceAndType: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 06 / 替型別命名" title="同一個 User shape，可以怎麼描述？" titleSize={72} section="INTERFACE / TYPE">
+  <Frame eyebrow="03 / TYPESCRIPT 06 / 替型別命名" title="同一個 User shape，可以怎麼描述？" titleSize={72} section="INTERFACE / TYPE">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
       <div>
-        <Code title="INTERFACE / 描述 OBJECT SHAPE" language="TS" size={30}>{`interface User {
+        <Code title="INTERFACE / 描述 OBJECT SHAPE" language="TS" size={32}>{`interface User {
   id: number;
   name: string;
-}
-
-interface Admin extends User {
-  permissions: string[];
 }`}</Code>
-        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>用 extends 擴充 shape。<br />也支援同名宣告合併（declaration merging）。</p>
+        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>描述物件需要的欄位與型別。</p>
       </div>
       <div>
-        <Code title="TYPE / 同樣能描述 USER，也能組合型別" language="TS" size={30}>{`type User = {
+        <Code title="TYPE / 描述 SHAPE，也能替 UNION 命名" language="TS" size={32}>{`type User = {
   id: number;
   name: string;
 };
 
-type ID = string | number;
-type Status =
-  | "pending" | "success" | "error";`}</Code>
-        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>替型別命名，也能表達 union、intersection。<br />一般 object shape，兩者很多時候都可以。</p>
+type ID = string | number;`}</Code>
+        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>ID 替剛才的 string | number 取一個名字。</p>
       </div>
     </div>
+    <Strip style={{ marginTop: 36 }}>一般 object shape，兩者很多時候都可以；這裡是兩種替代寫法。</Strip>
   </Frame>
 );
 
 const GenericResponse: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 07 / 沿用 USER：ID + NAME" title="共用 API 包裝，怎麼保留 data 的型別？" titleSize={70} section="GENERICS">
+  <Frame eyebrow="03 / TYPESCRIPT 07 / 沿用 USER：ID + NAME" title="共用 API 包裝，怎麼保留 data 的型別？" titleSize={70} section="GENERICS">
     <div style={{ display: 'grid', gridTemplateColumns: '700px 1fr', gap: 48 }}>
       <div>
         <Code title="先看這個版本：DATA 是 ANY" language="TS" size={30}>{`interface ApiResponse {
@@ -585,7 +598,6 @@ const GenericResponse: Page = () => (
   message: string;
 }`}</Code>
         <p style={{ ...body, fontSize: 30, marginTop: 24 }}>any 不會擋下 data.naem 的拼字錯誤。</p>
-        <div style={{ marginTop: 32 }}><Note tag="GENERICS / 泛型" title="T：先保留一個型別的位置。">填入 User，data 就是 User。</Note></div>
       </div>
       <Steps>
         <Step>
@@ -593,31 +605,31 @@ const GenericResponse: Page = () => (
   data: T;
   message: string;
 }
-
 const response: ApiResponse<User> = {
   data: { id: 1, name: "Kylen" },
   message: "success"
 };
-
 response.data.name.toUpperCase();`}</Code>
         </Step>
       </Steps>
     </div>
+    <Steps>
+      <Step><Strip style={{ marginTop: 24 }}>Generics：T 先保留一個型別的位置；填入 User，data 就是 User。</Strip></Step>
+    </Steps>
   </Frame>
 );
 
 const RuntimeValidation: Page = () => (
-  <Frame eyebrow="TYPESCRIPT / 08 / 回到剛才的 FETCH" title="API 回傳的資料，真的就是 User 嗎？" titleSize={72} section="RUNTIME BOUNDARY">
+  <Frame eyebrow="03 / TYPESCRIPT 08 / 回到剛才的 FETCH" title="API 回傳的資料，真的就是 User 嗎？" titleSize={72} section="RUNTIME BOUNDARY">
     <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 56 }}>
       <div>
         <Code title="ASYNC 函式內的節錄 / 編譯時通過" language="TS" size={30}>{`interface User {
   id: number;
   name: string;
 }
-const user: User = await fetch("/api/user")
-  .then(res => res.json());
+const response = await fetch("/api/user");
+const user: User = await response.json();
 user.name.toUpperCase();`}</Code>
-        <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>此處 res.json() 的型別是 any；標註 User 沒有驗證資料。</p>
       </div>
       <Steps>
         <Step>
@@ -626,17 +638,22 @@ user.name.toUpperCase();`}</Code>
   "id": "ABC",
   "name": null
 }`}</Code>
-            <div style={{ marginTop: 28 }}><Note tag="INTERFACE 已移除 / 不會驗證" title="null 無法使用這個方法。" /></div>
+            <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>name 是 null；呼叫 toUpperCase()<br />會在 runtime 拋出 TypeError。</p>
           </div>
         </Step>
       </Steps>
     </div>
-    <Strip style={{ marginTop: 26 }}>外部資料 → runtime schema validation → 再作為 User 使用</Strip>
+    <Steps>
+      <Step>
+        <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>response.json() → Promise&lt;any&gt;；await 後 → any。User 註記不會驗證資料。</p>
+        <Strip style={{ marginTop: 20 }}>外部資料 → runtime schema validation → 再作為 User 使用</Strip>
+      </Step>
+    </Steps>
   </Frame>
 );
 
 const FullSessionRecap: Page = () => (
-  <Frame eyebrow="整場回顧 / 三個問題，三個責任" title="從執行順序，到資料進入系統的邊界。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
+  <Frame eyebrow="03 / TYPESCRIPT 09 / 整場回顧" title="從執行順序，到資料進入系統的邊界。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36, marginTop: 8 }}>
       <Process n="JAVASCRIPT" title="程式怎麼執行？">Event Loop<br />Promise<br />async / await</Process>
       <Process n="TYPESCRIPT" title="執行前能知道什麼？">Type / 資料的 shape<br />Narrowing / 流程中的型別<br />Generic / 保留型別資訊</Process>
@@ -648,7 +665,7 @@ const FullSessionRecap: Page = () => (
 );
 
 export const meta: SlideMeta = {
-  title: 'Day 1｜JavaScript 執行與非同步 — Kylen',
+  title: 'Day 1｜JavaScript 執行、非同步與 TypeScript 型別 — Kylen',
   createdAt: '2026-09-15T03:11:44.021Z',
 };
 
@@ -687,11 +704,12 @@ export const notes: (string | undefined)[] = [
 參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types`,
   `37:00–38:30｜1 分 30 秒｜TypeScript 02
 核心：TypeScript 會從程式碼推斷型別，不需要每個位置都手動 annotation。
-講法與讀碼：由上到下看 name 的字串初值、age 的數字初值，再看 add 的 number 參數與 return a + b。問「沒有寫回傳型別，是否代表 any？」短停後指出推斷結果仍是 number，這就叫 type inference。
-易誤解：此處 const name 精確推斷為 "Kylen"、age 為 20，是 string／number 的 literal type；不要把編輯器顯示的精確型別說錯。只花約 15 秒說它保留了更精確的已知值。普通獨立函式的參數不會只因後面有呼叫就自動回推，所以本例保留參數 annotation。此片段視為模組中的程式碼，不混入瀏覽器全域 name 宣告衝突。
-不延伸：不教 widening、as const、完整 primitive type 或 contextual typing；不主張一律刪除回傳型別，公開 API 仍可明確標示契約。
-銜接：推斷不只處理單一值，也會看 object 的欄位；下一頁問一個沒有宣告 User 身分的物件能不能傳入。
-參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#literal-types`,
+講法與讀碼：用約 30 秒由上到下看 userName 的字串初值、age 的數字初值，對照右欄推斷的 string、number。再用約 30 秒看 add 的 number 參數與 return a + b，問「沒有寫回傳型別，是否代表 any？」短停後指出兩個 number 相加，回傳仍推斷為 number。最後讀黃色結論，給名稱 type inference；不用在每個位置重複已知的型別。餘下時間銜接 object 的推斷。
+易誤解：省略 annotation 不等於取消型別檢查，也不等於 any；本例的初始值與函式內容已提供足夠線索。普通獨立函式的參數不會只因後面有呼叫就自動回推，所以保留 a、b 的 annotation。不主張一律刪除回傳型別，公開 API 仍可明確標示契約。
+備用（被問到才說）：本例 let userName 與 let age 推斷為 string、number；若改為 const，這兩個原始值可保留更精確的 "Kylen"、20 literal type。這是型別精確程度的補充，不列入這頁的 90 秒主線。
+不延伸：不展開 let／const 差異、literal type、widening、as const、完整 primitive type 或 contextual typing。
+銜接：TS 也能從 object 的欄位推斷結構；下一頁的 data 沒有標上 User，為什麼仍能傳給需要 User 的函式？
+參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables`,
   `38:30–41:30｜3 分鐘｜TypeScript 03
 核心：TypeScript 主要比較 shape 的相容性，不要求 nominal identity。
 講法與讀碼：先用約 40 秒讀左欄 interface User 的 id、name，再讀 printUser 的輸入與實際使用的 name。接著讀右欄 data 的三個欄位，停在 printUser(data) 問標題問題。逐一配對 id: number、name: string，約 60 秒解釋符合函式要求就能傳入；多出的 email 不妨礙這個既有變數相容。最後給名稱 structural typing，用剩餘時間對照 Java／C# 常見的 interface nominal identity：通常需要類別正式宣告實作關係。
@@ -702,7 +720,7 @@ export const notes: (string | undefined)[] = [
 參考：https://www.typescriptlang.org/docs/handbook/type-compatibility.html`,
   `41:30–43:00｜1 分 30 秒｜TypeScript 04
 核心：union 表達多種可能；在還沒區分前，操作必須對目前每一種可能都成立。
-講法與讀碼：先读 printId 的 id: string | number，將 | 讀成「或」；再讀 console.log 與下面兩次呼叫，指出字串和數字都符合。先不背功能名稱，理解需求後再指出 union type。最後按右鍵揭露黄色問題：如果改用 id.toUpperCase() 會怎樣？停 5 秒，回答數字不保證有這個方法，因此靜態檢查會擋下。
+講法與讀碼：先讀 printId 的 id: string | number，將 | 讀成「或」；再讀 console.log 與下面兩次呼叫，指出字串和數字都符合。先不背功能名稱，理解需求後再指出 union type。最後按右鍵揭露黃色問題：如果改用 id.toUpperCase() 會怎樣？停 5 秒，回答數字不保證有這個方法，因此靜態檢查會擋下。
 易誤解：不是把值同時轉成兩種型別，不是 runtime 的 | 位元運算，也不等同 any；TypeScript 仍保留這兩種可能，並約束可用操作。console.log 同時能接受字串與數字，所以本頁程式有效。
 不延伸：不加第三種型別、overload 或複雜 union；不以 type assertion 強行消除錯誤。
 銜接：與其要求 TS 相信我們，下一頁使用真的 JavaScript 判斷，確定現在進到哪個分支。
@@ -716,21 +734,22 @@ export const notes: (string | undefined)[] = [
 參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html`,
   `45:30–47:30｜2 分鐘｜TypeScript 06
 核心：一般 object shape 多半能用 interface 或 type；依要表達的內容理解差異，不爭哪個比較好。
-講法與讀碼：先比較兩欄最上方相同的 id／name，左邊 interface User、右邊 type User = { ... }，說兩欄是替代方案，不要貼在同一個作用域重複宣告。接著左欄往下讀 Admin extends User，表示保留 User 欄位再加 permissions；string[] 只讀成字串陣列。補一句 interface 支援同名 declaration merging。右欄接著讀 ID 的 union，再讀 Status 的三個合法字串值，說 type 能為 union 與 intersection 等型別組合命名。
-易誤解：interface 的 extends 在這裡擴充型別描述，不產生 runtime 繼承物件；type 也能描述 object，並非只有 interface 能用在物件。type alias 本身不支援同名 declaration merging。不要因為使用 interface 就推論它有 runtime 身分或 API 驗證能力。
-不延伸：不現場示範 merging、intersection 語法細節、團隊風格辯論或完整比較表；Status 只用來延續 union，不擴充狀態機教學。
-銜接：假設團隊用 interface 描述 API 的包裝，裡面 data 每個 endpoint 都不同，要怎麼保留它的型別？
+講法與讀碼：前 50 秒由左到右比較兩個 User：先讀 interface 的 id／name，再讀 type User = { ... } 相同的欄位，指出這個 object shape 兩種寫法都能描述。兩欄是替代版本，不要貼在同一個作用域重複宣告 User。接著用約 40 秒往下讀 type ID = string | number，連回已看過的 union：type 還能替這種型別組合取名字。最後用約 30 秒讀黃色結論並轉向下一頁。只掌握這兩個使用情境，不列功能清單、不比較哪一個更高級。
+易誤解：type 也能描述 object，並非只有 interface 能用在物件；替型別取名不會建立 runtime 類別、替資料轉型或驗證 API 回應。一般 object shape 兩者都可用，不代表所有語法與行為完全相同。
+備用（被問到才說）：interface Admin extends User { permissions: string[]; } 會沿用 User 欄位並增加字串陣列 permissions，只擴充型別描述，不建立 runtime 繼承物件。interface 支援同名 declaration merging；type alias 不支援這種同名合併。type 也能命名 intersection，例如 type Admin = User & { permissions: string[]; }，表示同時滿足兩個結構；type Status = "pending" | "success" | "error" 則限定三個合法字串值。這些差異留待 Q&A，不列入本頁兩分鐘主線。
+不延伸：不現場示範 declaration merging、extends／intersection 細節、狀態機、團隊風格辯論或完整比較表。
+銜接：下一頁沿用 interface 描述 API response 的共同包裝；如果每個 endpoint 的 data 都不同，要怎麼保留它的型別？
 參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces`,
   `47:30–50:00｜2 分 30 秒｜TypeScript 07
 核心：泛型保留可替換的型別位置，讓共同結構重用時不丟掉內部資料的型別。
-講法與讀碼：先用約 40 秒讀左側 ApiResponse 的 data: any 與 message，指出 any 讓 data.naem 拼錯也不報錯。按右鍵揭露右邊替代版本，從 ApiResponse<T> 的 T 一路對到 data: T。再讀 response: ApiResponse<User>：把這個位置填成 User。User 沿用前面的 interface，id 是 number、name 是 string；看 data 的兩個值、message，再到最後 name.toUpperCase()，這時仍保有 string 的型別資訊。最後用一句話把泛型連到聽眾熟悉的容器型別。
+講法與讀碼：進頁先只看左側 any 版本與問題，用約 40 秒讀 ApiResponse 的 data: any 與 message，指出 any 讓 data.naem 拼錯也不報錯。第一次按右鍵揭露右邊替代版本，從 ApiResponse<T> 的 T 一路對到 data: T，再讀 response: ApiResponse<User> 與物件內容。User 沿用前面的 interface，id 是 number、name 是 string；看 data 的兩個值、message，再到最後 name.toUpperCase()，這時仍保有 string 的型別資訊。約 70 秒完成讀碼後，第二次按右鍵才揭露黃色 mental model：T 先保留一個型別的位置，實際使用時填入 User。用剩餘約 40 秒把名稱 Generics 連到聽眾熟悉的容器型別並銜接下一頁。
 易誤解：左右兩個 ApiResponse 是改寫前後，並非要同時宣告。T 是型別參數，不是呼叫時傳入的 runtime 變數；寫 ApiResponse<User> 不會建立或驗證 User。any 也不是「會安全接受所有型別」的保證，而是放寬這個位置的檢查。此頁 data 是自己在程式碼中建立，與外部 JSON 的信任程度不同。
 不延伸：不講 conditional type、infer、複雜 generic constraints、variance 或泛型函式大全。
 銜接：自己建立的 data 能檢查；如果 data 是網路回來的，我們標上 User 就真的安全了嗎？下一頁回到前半場的 fetch。
 參考：https://www.typescriptlang.org/docs/handbook/2/generics.html`,
   `50:00–53:00｜3 分鐘｜TypeScript 08
 核心：TypeScript ≠ runtime validation；型別註記不能保證外部世界真的符合它。
-講法與讀碼：先讀 User 的 id／name，再讀 async 函式內的 fetch、then、res.json()、await，接回前半場：Promise 完成後繼續，不改變 task／microtask 機制。約 50 秒後停在 user.name.toUpperCase()，問 API 是否一定符合宣告。按右鍵揭露實際 JSON，由 id 的字串讀到 name 的 null；JSON 語法有效但 shape 不符合 User，最後一行 runtime 會拋 TypeError。再花約 60 秒解释 res.json() 的標準 DOM 型別是 Promise<any>，any 可被指派成 User，因此這段程式靜態檢查通過；加 annotation 沒有做任何 runtime 檢查，也沒有轉換資料。
+講法與讀碼：進頁只看 User 與呼叫碼，先讀 id／name，再由上往下讀兩個 await：await fetch 取得 response；await response.json() 將 JSON body 解析成 JavaScript 值，交給標成 User 的變數。約 50 秒後停在 user.name.toUpperCase()，問 API 是否一定符合宣告。第一次按右鍵揭露實際 JSON 與 runtime 結果，由 id 的字串讀到 name 的 null；JSON 語法有效但 shape 不符合 User，最後一行會拋 TypeError。停約 40 秒讓聽眾看見宣告與真實資料的落差。第二次按右鍵才揭露原因與黃色 validation 流程，再花約 60 秒解釋 response.json() 的標準 DOM 回傳型別是 Promise<any>，await 後取得的值是 any；any 可被指派成 User，所以靜態檢查通過。解析合法 JSON 與驗證 User shape 是兩件事；annotation 沒有執行驗證或轉換。最後約 30 秒帶出外部資料需經實際 schema validation，再銜接整場回顧。
 易誤解：若在程式碼直接把這份錯誤物件指派給 User，TS 本來能指出不一致；本例漏洞在外部資料與 any。不要教成 TS 對 null 或欄位型別一概無能為力。改寫成 as User 也不會補上驗證，不需要另教斷言語法。
 落地：外部資料先經可執行的 schema validation，通過後才當 User 使用，失敗就拒絕或處理錯誤。API response、localStorage、URL params、user input 都是邊界；可簡提 Zod 或 JSON Schema validator。API contract 文件、schema 本身、產生的 TS 型別都不等於驗證已經執行。
 不延伸：不做 Zod 教學、不加 HTTP 錯誤處理支線、不講驗證工具比較；講者若被問到 unknown，可口頭說它要求先檢查再使用，留待 Q&A。
@@ -742,13 +761,13 @@ export const notes: (string | undefined)[] = [
 講法與讀圖：本頁沒有新程式碼，依三欄從左到右、各欄由上往下讀。左欄用約 25 秒回顧 Event Loop、Promise、async／await，回答怎麼執行。中欄用約 30 秒回顧型別、narrowing、generic，回答執行前能知道什麼。右欄約 25 秒回到 API response、localStorage、URL params、user input，回答外部資料是否符合型別。指向頁底工具名稱只作定位，不教語法。
 易誤解：三欄是互補的責任，不是所有程式都必須依左到右跑過三個階段；static checking 與 runtime validation 不能互相取代。API contract 必須有實際檢查機制，才有對應的 runtime 保證。
 不延伸：不加新 feature、工具安裝或語法補遺。用剩下約 40 秒口頭回問「加上 TypeScript 會改變 1 → 4 → 3 → 2 嗎？」「API JSON 標上 User，就已經驗證了嗎？」各等幾秒後給答案。
-收尾銜接：讀黃色結論，55:00 結束教學，剩餘 5 分鐘留給原本安排的緩衝／Q&A。第三部分合计 20 分鐘，互動停頓已計入各頁預算。`,
+收尾銜接：讀黃色結論，55:00 結束教學，剩餘 5 分鐘留給原本安排的緩衝／Q&A。第三部分合計 20 分鐘，互動停頓已計入各頁預算。`,
 ];
 
 export default [
   Cover, Agenda, ReadFunction, PassFunction, CallbackTrace, TimerCallback,
-  MainThread, DependentWork, CallbackHell, PromiseMeaning, PromiseResolve,
-  ReadThen, PromiseChain, PromiseFailure, AwaitCompare, AsyncAwait,
+  MainThread, DependentWork, CallbackHell, CallbackHellVisual, PromiseMeaning, ReadThen,
+  PromiseResolve, PromiseChain, PromiseFailure, AwaitCompare, AsyncAwait,
   AwaitMeaning, TwoQueues, LoopRule, OrderAnswer, FetchBoundary, Recap,
   TypeScriptBoundary, TypeInference, StructuralTyping, UnionType, TypeNarrowing,
   InterfaceAndType, GenericResponse, RuntimeValidation, FullSessionRecap,

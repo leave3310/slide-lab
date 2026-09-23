@@ -100,7 +100,6 @@ const Process = ({ n, title, children, accent = false }: { n: string; title: str
 );
 
 // The teaching order connects asynchronous execution, error handling, and data contracts.
-
 const Cover: Page = () => (
   <section style={root}>
     <div style={{ position: 'absolute', top: 128, left: 120, ...label, color: muted }}>DAY 01 / 給初次接觸 JS 的後端工程師 / KYLEN</div>
@@ -492,9 +491,8 @@ const Recap: Page = () => (
 
 
 // Part 3: one API result model, static checking, and an explicit runtime boundary (20 minutes).
-
 const TypeScriptBoundary: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 01 / 執行前的型別檢查" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
+  <Frame eyebrow="03 / TYPESCRIPT / 執行前的型別檢查" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 64px 1fr', gap: 24, alignItems: 'center' }}>
       <Code title="執行前 / STATIC TYPE CHECKING" language="TS" size={30}>{`function add(a: number, b: number): number {
   return a + b;
@@ -505,33 +503,33 @@ const TypeScriptBoundary: Page = () => (
 }`}</Code>
     </div>
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 32 }}>
-      <Note tag="執行前多一道檢查" title="呼叫時，有沒有傳錯型別？">例如 add("1", 2)，會收到型別錯誤。</Note>
-      <Note tag="RUNTIME 沿用剛才的模型" title="執行的仍然是 JavaScript。"><div style={{ fontSize: 32, lineHeight: 1.5 }}>Event Loop、Call Stack、Promise、<br />async / await、task / microtask 都不變。</div></Note>
+      <Note tag="執行前多一道檢查" title="呼叫時，有沒有傳錯型別？"><div style={{ fontSize: 32 }}>add("1", 2) 會收到型別錯誤。</div></Note>
+      <Note tag="RUNTIME 沿用剛才的模型" title="執行的仍然是 JavaScript。"><div style={{ fontSize: 32, lineHeight: 1.5 }}>Event Loop、Promise、async / await<br />都沿用剛才的執行機制。</div></Note>
     </div>
-    <Strip style={{ marginTop: 20 }}>這些型別在 compile time 參與檢查；runtime 不會保留型別註記。</Strip>
+    <Strip style={{ marginTop: 18 }}>型別註記在執行前參與檢查；不會變成 runtime 的參數驗證。</Strip>
   </Frame>
 );
 
 const TypeInference: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 02 / 從程式碼看得出來的事" title="每個地方，都要手動標型別嗎？" section="TYPE INFERENCE">
+  <Frame eyebrow="03 / TYPE INFERENCE / 從程式碼取得線索" title="看得出來的型別，不必每次重寫。" section="TYPE INFERENCE">
     <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 64 }}>
-      <Code title="只標明函式的輸入" language="TS" size={36}>{`let userName = "Kylen";
+      <Code title="輸入標明型別，回傳值可以推斷" language="TS" size={36}>{`let userName = "Kylen";
 let age = 20;
 
 function add(a: number, b: number) {
   return a + b;
 }`}</Code>
-      <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
-        <Note tag="① 從初始值推斷" title="初始值已經提供線索。">userName → string<br />age → number</Note>
-        <Note tag="② 從 return 推斷" title="add 的回傳型別 → number">兩個 number 相加，結果也是 number。</Note>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 28 }}>
+        <Note tag="從初始值推斷" title="userName → string">age → number</Note>
+        <Note tag="從 RETURN 推斷" title="add 的回傳 → number">沒有寫回傳型別，不代表 any。</Note>
       </div>
     </div>
-    <Strip style={{ marginTop: 36 }}>Type inference（型別推斷）：能從程式碼知道的，不必重複 annotation。</Strip>
+    <Strip style={{ marginTop: 36 }}>局部值交給 inference；對外的函式契約，可以明確標示。</Strip>
   </Frame>
 );
 
 const StructuralTyping: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 03 / 後端工程師最需要換的視角" title="沒有 implements User，為什麼也能傳入？" titleSize={68} section="STRUCTURAL TYPING">
+  <Frame eyebrow="03 / STRUCTURAL TYPING / 後端工程師要換的視角" title="沒有 implements User，為什麼也能傳入？" titleSize={68} section="STRUCTURAL TYPING">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
       <Code title="函式需要的結構 / SHAPE" language="TS" size={32}>{`interface User {
   id: number;
@@ -540,264 +538,205 @@ const StructuralTyping: Page = () => (
 function printUser(user: User) {
   console.log(user.name);
 }`}</Code>
-      <div>
-        <Code title="呼叫端已經有的資料" language="TS" size={32}>{`const data = {
+      <Code title="呼叫端已經有的資料" language="TS" size={32}>{`const data = {
   id: 1,
   name: "Kylen",
   email: "kylen@example.com"
 };
 
 printUser(data); // OK`}</Code>
-      </div>
     </div>
-    <Strip style={{ marginTop: 30 }}>Structural typing：主要看「至少具有需要的 shape」，不要求正式宣告屬於 User。</Strip>
+    <Strip style={{ marginTop: 28 }}>至少有需要的欄位，且型別相容；不要求正式宣告屬於 User。</Strip>
     <p style={{ ...body, fontSize: 28, color: muted, marginTop: 16 }}>直接傳入新寫的 object literal，另有多餘屬性檢查；這裡傳的是既有變數 data。</p>
   </Frame>
 );
 
-const UnionType: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 04 / 同一個輸入有兩種可能" title="ID 可能是字串，也可能是數字，怎麼寫？" titleSize={70} section="UNION TYPE">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64 }}>
-      <Code title="先把可能性寫出來" language="TS" size={36}>{`function printId(id: string | number) {
-  console.log(id);
-}
+const InterfaceAndType: Page = () => (
+  <Frame eyebrow="03 / INTERFACE 與 TYPE / 替型別命名" title="先命名 User，接下來共用這個契約。" titleSize={72} section="INTERFACE / TYPE">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <Code title="INTERFACE / 描述 OBJECT SHAPE" language="TS" size={36}>{`interface User {
+  id: number;
+  name: string;
+}`}</Code>
+      <Code title="TYPE / 也能描述同一個 SHAPE" language="TS" size={36}>{`type User = {
+  id: number;
+  name: string;
+};`}</Code>
+    </div>
+    <Strip style={{ marginTop: 42 }}>兩欄是替代寫法。後面沿用 interface User；type 用來命名聯合型別。</Strip>
+    <p style={{ ...body, fontSize: 32, color: muted, marginTop: 32 }}>命名型別不會建立 runtime 類別，也不會替外部資料轉型。</p>
+  </Frame>
+);
 
-printId("A12");
-printId(12);`}</Code>
-      <Note tag="STRING | NUMBER" title="其中一種，就符合輸入要求。">這就是 union type（聯合型別）。<br /><br />進到函式時，還不知道這次<br />收到的是哪一種。</Note>
+const UnionType: Page = () => (
+  <Frame eyebrow="03 / UNION / 把 API 結果的兩條路徑寫清楚" title="成功有 data，失敗有 error。" section="API RESULT / UNION">
+    <Code title="沿用 USER：ID 是 NUMBER，NAME 是 STRING" language="TS" size={38}>{`type UserResult =
+  | { ok: true; data: User }
+  | { ok: false; error: string };`}</Code>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 36 }}>
+      <Note tag="OK: TRUE" title="成功分支才保證有 data。"><div style={{ fontSize: 32 }}>true 是特定值，不是任意 boolean。</div></Note>
+      <Note tag="OK: FALSE" title="失敗分支保證有 error。"><div style={{ fontSize: 32 }}>| 讀成「或」：兩種結果其中一種。</div></Note>
     </div>
     <Steps>
-      <Step><Strip style={{ marginTop: 42 }}>這時直接呼叫 id.toUpperCase()？還不行，因為 id 也可能是 number。</Strip></Step>
+      <Step><Strip style={{ marginTop: 28 }}>還沒判斷 ok，可以直接讀 result.data 嗎？</Strip></Step>
     </Steps>
   </Frame>
 );
 
 const TypeNarrowing: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 05 / 先判斷，再使用" title="進到這個分支，id 還可能是數字嗎？" titleSize={72} section="NARROWING">
-    <div style={{ display: 'grid', gridTemplateColumns: '1050px 1fr', gap: 64 }}>
-      <Code title="沿著 JavaScript 的 control flow 往下讀" language="TS" size={34}>{`function printId(id: string | number) {
-  if (typeof id === "string") {
-    console.log(id.toUpperCase());
+  <Frame eyebrow="03 / NARROWING / 用共同欄位分辨結果" title="判斷 ok，這一行的型別就確定了。" titleSize={72} section="API RESULT / NARROWING">
+    <div style={{ display: 'grid', gridTemplateColumns: '1080px 1fr', gap: 56 }}>
+      <Code title="USERRESULT 沿用上一頁的兩種結果" language="TS" size={34}>{`function showUser(result: UserResult) {
+  if (result.ok) {
+    console.log(result.data.name.toUpperCase());
   } else {
-    console.log(id);
+    console.error(result.error);
   }
 }`}</Code>
-      <div style={{ display: 'grid', alignContent: 'start', gap: 30 }}>
+      <div>
         <Steps>
-          <Step><Note tag="IF 成立 / 只剩 STRING" title="可以用 toUpperCase()。">typeof 是實際執行的 JS 判斷。</Note></Step>
-          <Step><Note tag="ELSE / 排除 STRING" title="這裡只剩 number。">TS 在檢查時追蹤這個分支。</Note></Step>
+          <Step><Note tag="IF / OK 是 TRUE" title="data 是 User。"><div style={{ fontSize: 32 }}>name 是 string，<br />可用 toUpperCase()。</div></Note></Step>
+          <Step><div style={{ marginTop: 28 }}><Note tag="ELSE / OK 是 FALSE" title="error 是 string。"><div style={{ fontSize: 32 }}>這裡不保證有 data。</div></Note></div></Step>
         </Steps>
       </div>
     </div>
-    <Strip style={{ marginTop: 36 }}>Narrowing（型別縮小）：跟著流程，判斷這一行的值還可能是哪些型別。</Strip>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 12 }}>前半場追蹤「什麼時候執行」；現在追蹤「這一行可能是什麼型別」。</p>
-  </Frame>
-);
-
-const InterfaceAndType: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 06 / 替型別命名" title="同一個 User shape，可以怎麼描述？" titleSize={72} section="INTERFACE / TYPE">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
-      <div>
-        <Code title="INTERFACE / 描述 OBJECT SHAPE" language="TS" size={32}>{`interface User {
-  id: number;
-  name: string;
-}`}</Code>
-        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>描述物件需要的欄位與型別。</p>
-      </div>
-      <div>
-        <Code title="TYPE / 描述 SHAPE，也能替 UNION 命名" language="TS" size={32}>{`type User = {
-  id: number;
-  name: string;
-};
-
-type ID = string | number;`}</Code>
-        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>ID 替剛才的 string | number 取一個名字。</p>
-      </div>
-    </div>
-    <Strip style={{ marginTop: 36 }}>一般 object shape，兩者很多時候都可以；這裡是兩種替代寫法。</Strip>
+    <Strip style={{ marginTop: 30 }}>Discriminated union：用共同欄位的特定值，區分不同的資料結構。</Strip>
   </Frame>
 );
 
 const GenericResponse: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 07 / 沿用 USER：ID + NAME" title="共用 API 包裝，怎麼保留 data 的型別？" titleSize={70} section="GENERICS">
-    <div style={{ display: 'grid', gridTemplateColumns: '700px 1fr', gap: 48 }}>
-      <div>
-        <Code title="先看這個版本：DATA 是 ANY" language="TS" size={30}>{`interface ApiResponse {
-  data: any;
-  message: string;
-}`}</Code>
-        <p style={{ ...body, fontSize: 30, marginTop: 24 }}>any 不會擋下 data.naem 的拼字錯誤。</p>
-      </div>
-      <Steps>
-        <Step>
-          <Code title="填入 USER，後續仍然知道 NAME 是 STRING" language="TS" size={30}>{`interface ApiResponse<T> {
-  data: T;
-  message: string;
-}
-const response: ApiResponse<User> = {
-  data: { id: 1, name: "Kylen" },
-  message: "success"
-};
-response.data.name.toUpperCase();`}</Code>
-        </Step>
-      </Steps>
+  <Frame eyebrow="03 / GENERICS / 保留成功資料的型別" title="同一種結果包裝，讓 data 的型別可替換。" titleSize={68} section="API RESULT / GENERICS">
+    <Code title="從 USERRESULT，把 USER 抽成型別參數 T" language="TS" size={38}>{`type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };`}</Code>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginTop: 34 }}>
+      <Code title="單筆 API 結果" language="TS" size={30}>{`type UserResult = ApiResult<User>;`}</Code>
+      <Code title="清單 API 結果 / USER[] 是陣列" language="TS" size={30}>{`type UserListResult = ApiResult<User[]>;`}</Code>
     </div>
-    <Steps>
-      <Step><Strip style={{ marginTop: 24 }}>Generics：T 先保留一個型別的位置；填入 User，data 就是 User。</Strip></Step>
-    </Steps>
+    <Strip style={{ marginTop: 26 }}>先判斷 ok；成功後，data 仍精確地是 User 或 User[]，不必退回 any。</Strip>
   </Frame>
 );
 
 const RuntimeValidation: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 08 / 回到剛才的 FETCH" title="API 回傳的資料，真的就是 User 嗎？" titleSize={72} section="RUNTIME BOUNDARY">
-    <div style={{ display: 'grid', gridTemplateColumns: '970px 1fr', gap: 56 }}>
+  <Frame eyebrow="03 / RUNTIME BOUNDARY / JSON 語法正確，不代表 SHAPE 正確" title="API 回來的值，還不能直接信任。" section="RUNTIME VALIDATION">
+    <div style={{ display: 'grid', gridTemplateColumns: '1020px 1fr', gap: 56 }}>
       <div>
-        <Code title="ASYNC 函式內的節錄 / 編譯時通過" language="TS" size={30}>{`interface User {
-  id: number;
-  name: string;
-}
-const response = await fetch("/api/user");
-const user: User = await response.json();
-user.name.toUpperCase();`}</Code>
+        <Code title="ASYNC 函式內的節錄 / HTTP 已成功" language="TS" size={32}>{`const raw: unknown = await response.json();
+
+// 直接讀 raw.name？型別檢查不允許。
+// 先檢查，才能把 raw 當成 User。`}</Code>
+        <p style={{ ...body, fontSize: 32, color: muted, marginTop: 30 }}>unknown 接得住任何值，<br />但使用前必須先確認它的結構。</p>
       </div>
-      <Steps>
-        <Step>
-          <div>
-            <Code title="API 實際回傳 / 合法 JSON" language="JSON" size={34}>{`{
+      <Code title="合法 JSON / 不符合 USER" language="JSON" size={36}>{`{
   "id": "ABC",
   "name": null
 }`}</Code>
-            <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>name 是 null；呼叫 toUpperCase()<br />會在 runtime 拋出 TypeError。</p>
-          </div>
-        </Step>
-      </Steps>
     </div>
-    <Steps>
-      <Step>
-        <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>response.json() → Promise&lt;any&gt;；await 後 → any。User 註記不會驗證資料。</p>
-        <Strip style={{ marginTop: 20 }}>外部資料 → runtime schema validation → 再作為 User 使用</Strip>
-      </Step>
-    </Steps>
+    <Strip style={{ marginTop: 34 }}>unknown 本身不驗證資料。下一步要真的檢查 id 與 name。</Strip>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 22 }}>外部 JSON → unknown → 執行欄位檢查 → 通過後才當作 User 使用</p>
+  </Frame>
+);
+
+const ParseUser: Page = () => (
+  <Frame eyebrow="03 / RUNTIME VALIDATION / 把檢查寫成可執行的程式" title="檢查不通過就拋錯，通過才回傳 User。" titleSize={70} section="RUNTIME VALIDATION">
+    <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 56 }}>
+      <Code title="最小驗證器 / 不做型別斷言" language="TS" size={28}>{`function parseUser(value: unknown): User {
+  if (
+    typeof value !== "object" || value === null ||
+    !("id" in value) ||
+    typeof value.id !== "number" ||
+    !("name" in value) ||
+    typeof value.name !== "string"
+  ) {
+    throw new Error("Invalid User");
+  }
+  return { id: value.id, name: value.name };
+}`}</Code>
+      <div>
+        <Note tag="不符合就中止" title="缺欄位、型別錯誤 → throw"><div style={{ fontSize: 30, lineHeight: 1.5 }}>typeof、in、null 判斷<br />都真的會在 runtime 執行。</div></Note>
+        <div style={{ marginTop: 36 }}><Note tag="走到 RETURN" title="id 與 name 已確認。"><div style={{ fontSize: 30, lineHeight: 1.5 }}>回傳的物件符合 User。<br />下一頁處理被拋出的錯誤。</div></Note></div>
+      </div>
+    </div>
+  </Frame>
+);
+
+const ValidateAtBoundary: Page = () => (
+  <Frame eyebrow="03 / 把邊界接回 APIRESULT / 成功與失敗都有出口" title="驗證成功回 data；失敗回明確的 error。" titleSize={68} section="API RESULT / RUNTIME BOUNDARY">
+    <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 56 }}>
+      <Code title="ENDPOINT 回 USER JSON；此函式包成 APIRESULT" language="TS" size={28}>{`async function loadUser(): Promise<ApiResult<User>> {
+  try {
+    const response = await fetch("/api/user");
+    if (!response.ok) throw new Error("HTTP error");
+    const raw: unknown = await response.json();
+    return { ok: true, data: parseUser(raw) };
+  } catch (error) {
+    console.error(error);
+    return { ok: false, error: "使用者載入失敗" };
+  }
+}`}</Code>
+      <div>
+        <Note tag="成功 / OK: TRUE" title="先 parseUser，才有 data。"><div style={{ fontSize: 30, lineHeight: 1.5 }}>呼叫端 await 後，<br />先判斷 result.ok 再使用。</div></Note>
+        <div style={{ marginTop: 32 }}><Note tag="失敗 / OK: FALSE" title="四種失敗，進同一個出口。"><div style={{ fontSize: 30, lineHeight: 1.5 }}>網路、HTTP、JSON 語法、<br />User 欄位檢查。</div></Note></div>
+      </div>
+    </div>
+    <p style={{ ...body, fontSize: 28, color: muted, marginTop: 18 }}>此處 catch 正常回傳 ApiResult：Promise 會 fulfilled，呼叫端仍須檢查 ok。</p>
   </Frame>
 );
 
 const FullSessionRecap: Page = () => (
-  <Frame eyebrow="03 / TYPESCRIPT 09 / 整場回顧" title="從執行順序，到資料進入系統的邊界。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
+  <Frame eyebrow="03 / 整場回顧 / 回到後端工程的三個判斷" title="安排工作、保留錯誤、確認資料契約。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36, marginTop: 8 }}>
-      <Process n="JAVASCRIPT" title="程式怎麼執行？">Event Loop<br />Promise<br />async / await</Process>
-      <Process n="TYPESCRIPT" title="執行前能知道什麼？">Type / 資料的 shape<br />Narrowing / 流程中的型別<br />Generic / 保留型別資訊</Process>
-      <Process n="RUNTIME BOUNDARY" title="外部資料符合型別嗎？" accent>Runtime validation<br />API response / localStorage<br />URL params / user input</Process>
+      <Process n="非同步流程" title="哪些工作可以並行？">先看資料相依性。<br />Promise.all 不自動取消。<br />catch 要決定如何回傳。</Process>
+      <Process n="執行模型" title="目前執行緒會卡住嗎？">await 暫停函式的後續。<br />async 不會搬走同步計算。<br />Promise 後續用 microtask。</Process>
+      <Process n="資料契約" title="資料真的符合宣告嗎？" accent>Union 描述成功與失敗。<br />Generic 保留 data 型別。<br />外部資料先實際驗證。</Process>
     </div>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 28 }}>邊界可用 Zod、JSON Schema validator 等做驗證；API contract 也需要實際落實檢查。</p>
-    <Strip style={{ marginTop: 30 }}>JavaScript 決定怎麼跑；TypeScript 在執行前描述與檢查資料的 shape。<br />外部資料進入系統時，仍需要 runtime validation。</Strip>
+    <Strip style={{ marginTop: 48 }}>判斷是否能並行；說清楚錯誤交給誰；在資料進入系統時落實檢查。</Strip>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 28 }}>55:00 完成主線 · 最後 5 分鐘 Q&A／緩衝</p>
   </Frame>
 );
+
 
 export const meta: SlideMeta = {
   title: 'Day 1｜JavaScript 執行、非同步與 TypeScript 型別 — Kylen',
   createdAt: '2026-09-15T03:11:44.021Z',
 };
 
-// Speaker notes preserve source details while the main path stays accessible to JS beginners.
-// A: /Users/athena/Desktop/群組筆記/筆記/Source/Post/js Event loop.md
-// B: /Users/athena/Desktop/群組筆記/筆記/Source/Post/從 Callback 到 Promise 再到 async、await 的演進歷史.md
+// Speaker notes: 35 minutes JavaScript, 20 minutes TypeScript, and 5 minutes Q&A.
 export const notes: (string | undefined)[] = [
-  "00:00–00:30｜30 秒\n開場：假設聽眾已會寫後端程式，但不一定熟悉 JavaScript／TypeScript。整場先建立 JavaScript 的非同步寫法與執行順序，再看 TypeScript 如何在執行前描述與檢查資料。核心定位：JavaScript 決定程式怎麼跑，TypeScript 加上靜態型別檢查。封面由上到下讀兩個主題，暫時不解釋型別語法；下一頁交代整場三個問題與時間。",
-  "00:30–01:00｜30 秒\n依三欄交代整場路線：01 非同步流程怎麼寫，從傳遞函式走到 Callback／Promise／async-await；02 程式何時執行，用 Event Loop、task／microtask 解釋已看過的程式；03 執行前能檢查什麼，用 TypeScript 建立資料 shape 與型別的觀念。前兩部分合計 35 分鐘，第三部分 20 分鐘，最後 5 分鐘作緩衝／Q&A。三個編號是整場章節，不是三種非同步語法。下一頁只用一個短函式接上必要的 JS 寫法。",
-  "01:00–01:30｜30 秒\n核心：用聽眾熟悉的函式觀念讀懂箭頭寫法。來源 B 的 multiNum 由左到右只讀一句：收到 num，就印出 num × 10。接著指 multiNum(8)，說呼叫時會印 80；目前畫面上的宣告本身還沒輸出。不要逐字解釋 const、參數、乘法或 console.log，也不展開箭頭函式與一般函式的差異。下一頁直接問：如果把這個函式交給另一個函式呢？",
-  "01:30–02:30｜1 分鐘\n核心：傳函式與現在呼叫函式是不同動作。由 addNum(6, 2, multiNum) 左到右快速讀一次，前兩個值做加法，焦點放在第三個值。對照兩欄：multiNum 把函式交出去；multiNum(8) 則現在呼叫並印出 80。傳給對方、由對方在需要時呼叫的函式，扮演 callback 的角色。停幾秒讓聽眾指出此例有沒有先執行 multiNum。提醒 callback 不是特殊關鍵字，也還不能據此判斷是否非同步；不重講命名與參數定義。下一頁看 addNum 內部到底何時呼叫它。",
-  "02:30–03:30｜1 分鐘\n核心：callback 是否非同步，要看接收方怎麼呼叫。承接呼叫端，沿函式內容往下讀一次：6 + 2 → 8 > 5 → callback(8) → multiNum(8) → 印 80。直接用右欄配對實際值，不再逐個定義 a、b、callback。這一例在 addNum 返回之前就直接呼叫 callback，所以 callback 本身不等於非同步。只追成立分支，不展開 if／else 語法。下一頁換成計時器，觀察同樣傳函式卻稍後才執行的情況。",
-  "03:30–05:30｜2 分鐘\n來源 A 的四行程式，暫時抽掉 Promise 那一行，先看計時器。setTimeout 收到函式與延遲毫秒數；() => ... 是無參數的箭頭函式。主程式安排計時後繼續往下，先印 1、4；稍後 callback 印 2。0 不代表立刻插隊。這裡不先講 task 與 microtask。",
-  "05:30–07:00｜1 分 30 秒\n來源 A 技術修正與使用者大綱。範圍是瀏覽器主執行緒，不是宣稱整個瀏覽器只有一條執行緒，也不假設所有後端框架都用相同執行方式。Call Stack 用白話解讀成目前函式呼叫的執行進度；Web APIs 是瀏覽器提供的計時、網路等功能。同步工作占住主執行緒時，畫面和互動得等待。",
-  "07:00–08:00｜1 分鐘\n來源 B 三個相依操作。先用聽眾熟悉的資料相依性讀流程：第二步需要第一步的 result，第三步需要第二步的 newResult。doSomething、doSomethingElse、doThirdThing 都是教材示意函式，不是 JS 內建 API；此時不要發明新的業務情境。",
-  "08:00–09:15｜1 分 15 秒\n核心：接收成功與失敗 callback 的 API，會把相依流程寫成巢狀。來源 B callback hell 程式由上往下按縮排讀：doSomething 接收成功函式與 failureCallback，完成後在成功函式內呼叫下一個 API；後兩個 API 也透過 callback 通知完成。function (result) { ... } 就是收到結果後要做的事，不額外教字串語法。先用這三層建立讀法，指出成功路徑往內一層、失敗處理分散在各層。銜接：目前只有三層，還算能追；如果把更多相依步驟繼續放進去，下一頁看看會長成什麼樣子。",
-  `09:15–10:00｜45 秒
-核心：相依步驟持續以巢狀 callback 串接，會讓流程與錯誤處理越來越難追。
-講法與讀圖：先停約 5 秒讓聽眾看圖，再從上往下指縮排一路向右、最後多層括號往回收的形狀。可以說：「剛才只有三層，還算看得懂。但如果每一步完成後，都把下一步放進 callback 裡，程式就會一路往右長，變成這張圖的樣子。」用約 25 秒建立感受，再指黃色重點句，給名稱 Callback Hell。
-易誤解：問題是相依流程一層包一層，不能只憑 callback 數量判斷程式好壞；callback 本身仍是正常的工具。圖片用來觀察結構，不要求聽眾讀懂圖中各個 API。
-不延伸：不逐行講解圖片、不介紹圖中套件或遊戲，也不把所有 callback 都說成非同步。
-銜接：用最後約 15 秒問「能不能保留這些相依步驟，卻把流程攤平、由上往下讀？」接到下一頁 Promise；會先改寫 API 讓它回傳 Promise，不是直接在原 callback API 上加 .then()。
-圖片來源：使用者提供的 callback hell 圖片。`,
-  "10:00–11:30｜1 分 30 秒\n核心：從 callback 換成 Promise，包含 API 介面的改寫。承接上一頁的巢狀結構問題，先讀左欄 doSomething(successCallback, failureCallback)，對應前面範例直接傳入成功與失敗的處理函式。再讀右欄：新版 doSomething() 已改成回傳 Promise，成功與失敗的後續分別接在 then／catch。名稱沿用，但這是替代版本；doSomethingElse 與 doThirdThing 在後續也假設已改為回傳 Promise。Promise 是表示工作結果的物件，結果可能還在等待；不是最後的資料，也不表示新增 JavaScript 執行緒。兩欄先理解介面的差異，不示範完整包裝或 reject 實作。下一頁先看如何使用這個 Promise，之後才打開 API 內部看成功值從哪裡來。",
-  "11:30–13:30｜2 分鐘\n核心：then 的 callback 取得上一步的成功值，return 把下一步接進同一條流程。承接已改寫的 API，由 doSomething() 往下讀：它回傳 Promise，成功後 then 收到 result，把 result 傳給同樣回傳 Promise 的 doSomethingElse，再 return 給這段鏈。後續若還有 then，就會等待這一步的成功結果。不要誤讀為 callback API 自動變成 Promise，也不把 return 的 Promise 本身當成下一個 callback 收到的最終資料。先停在一段 then，不提前掃完整鏈。銜接：呼叫端的讀法有了，下一頁打開 doSomething 內部，看它怎麼建立 Promise、提供 result。",
-  "13:30–15:30｜2 分鐘\n核心：改寫後的 API 回傳 Promise，稍後用 resolve 提供成功值。從 function doSomething() 往下讀 return 的運算式：new Promise 會立即執行收到的內部函式（executor），在這裡安排 200ms 計時器；內部函式結束、建構完成後，doSomething 才將 Promise 回傳。不是先回傳才啟動 executor。稍後計時條件就緒且主執行緒可執行時，計時器 callback 印訊息並 resolve 網址字串；這就是上一頁 then 的 result。200ms 不是精準執行時間保證。resolve 是 Promise 傳入的函式，不展開 reject、完整 callback 包裝、事件佇列或建構器細節。銜接：現在知道如何取得 Promise 與它的成功值，回到呼叫端把三個相依步驟接起來。",
-  "15:30–17:30｜2 分鐘\n核心：回傳下一步的 Promise，讓相依流程由上往下接續。來源 B 完整 Promise chain 沿 result → newResult → finalResult 讀下去。再次確認三個示意 API 都使用已改為回傳 Promise 的版本，沿用前面單一 then 的讀法；前兩段 return 串起後續工作，最後一段只是印出結果，沒有 return 新工作。流程仍然相依，不能說成平行呼叫 API，也不是只在原 callback 程式尾端加 .then()。此頁先追成功路徑，不展開中途恢復或多種鏈式寫法。下一頁再看第二步失敗時，catch 如何接到錯誤。",
-  "17:30–19:00｜1 分 30 秒\n來源 B 最後一段 Promise 說明。這條鏈每個 then 都只有成功處理；假設第二步拋錯或回傳的 Promise 失敗，就跳過第三步及最後的成功輸出，錯誤沿鏈傳到 catch(failureCallback)。不擴展到 catch 後續鏈的其他用法。",
-  "19:00–20:30｜1 分 30 秒\n來源 B then 與 async/await 範例的前兩步。左邊先完成再呼叫 callback；右邊 await 取得 result，再傳到下一步。右邊是 async 函式內的節錄，不能照這個節錄誤解成任何函式裡都能用 await。同一組已回傳 Promise 的 API，只改寫接續方式，沒有變成同步 API。下一頁加上完整 async 函式與成功／失敗流程，再看呼叫端如何繼續。",
-  "20:30–22:30｜2 分鐘\n核心：async 函式裡可以用 await／try／catch 寫流程，呼叫它仍然拿到 Promise。來源 B 完整 async function foo，由上往下讀 try 內三個 await，依序取得 result、newResult、finalResult，再印出結果。catch(error) 接到錯誤並交給 failureCallback；遇到錯誤，後續相依操作不繼續執行。補上呼叫端定位：foo() 回傳 Promise，不是直接回傳 finalResult；本例沒有 return finalResult，正常結束時 Promise 的成功值是 undefined。最後一句備用即可，不展開 Promise 的錯誤恢復或回傳型別細節。這裡只宣告函式，尚未呼叫。銜接：下一頁用更短的 foo 加上呼叫端，追蹤 await 究竟暫停了誰。",
-  "22:30–25:00｜2 分 30 秒\n核心：呼叫 async 函式會先同步執行到第一個 await，暫停的是目前函式的後續，呼叫端取得 Promise 後繼續。先讀短版 foo 定義的 A、await、C；約 20 秒解釋 Promise.resolve() 取得已成功完成的 Promise，這裡沒有外部工作需要等待。接著從 const work = foo() 開始追蹤，按第一次右鍵揭露 A：進入 foo，先印 A，再到 await。按第二次揭露 B：即使等待的 Promise 已完成，await 後面仍稍後接續；foo 先交回 Promise 給 work，呼叫端繼續印 B。約 40 秒後按第三次揭露 C 與輸出 A → B → C：目前同步程式結束，才回到 await 後印 C，foo 的工作完成。work 是 Promise，不是 A／B／C 字串或 foo 的立即結果；等待的 Promise 已完成，也不等於整個 foo 已完成。可回問「C 能不能在 B 前面？」停幾秒確認。不要把 async 當成開執行緒，也不推論大量同步計算會自動讓出主執行緒；不加平行 API 或額外 await。銜接：C 為什麼稍後才能接續？下一頁把這種 Promise 後續放到 microtask 的位置。",
-  "25:00–27:30｜2 分 30 秒\n核心：準備好的計時器 callback 與 Promise 後續，屬於不同種類的工作。先定義 queue 是等待執行的工作，再由左到右分 task 與 microtask：左邊對應先前 setTimeout 印 2；右邊先對應 then 的 callback，再明確指上一頁 await 後印 C 的那一行，也是以 microtask 接續。等待的 Promise 結果確定後才能安排後續；Promise.resolve() 已完成，因此上一頁可以安排 C，但仍先讓呼叫端把 B 印完。多留約 30 秒讓聽眾配對「2 是 timer task，C 是 await 的 microtask」，不用背更多 API。補充備用：原稿還列出 setInterval、使用者事件 callback、MutationObserver、queueMicrotask；本次不要求背誦，也不把後兩者說成必須 Promise resolve 才能排入。下一頁用 Event Loop 的簡化規則，決定兩類工作何時執行。",
-  "27:30–29:00｜1 分 30 秒\n來源 A Cards 與技術修正。Event Loop 是安排主執行緒後續工作的事件迴圈。這裡使用原稿簡化模型：目前 task 結束、Call Stack 清空，先清空 microtask，再執行下一個 task。FIFO 指各佇列內的處理，不宣稱所有 task 來源都有單一全域順序。microtask checkpoint 是這段清空流程的名稱，放在講者備註即可。",
-  "29:00–32:00｜3 分鐘\n核心：同一段同步程式先完成，再清空 microtask，才處理準備好的 timer task。來源 A 完整四行程式，沿用第 17 頁看過的 Promise.resolve()：已完成的 Promise，其 then 仍安排為 microtask，並非在這一行直接執行 callback。由上一頁向前進入，按右鍵逐一揭露：先印 1；遇到 timer 只安排稍後，再遇到 then 安排微任務，接著直接印 4；目前 script 結束，microtask 印 3，最後 timer task 印 2。每揭露一個輸出都指回原本程式行，留約 30 秒讓聽眾說出原因。對照第 17 頁：B 先於 C，與這裡 4 先於 3，都是同步呼叫端先完成、Promise 後續稍後接續。不要把 .then() 或 await 說成即使 Promise 已完成也立即呼叫，不延伸更多事件或多層佇列。下一頁把同樣的 Promise 接續規則套回 fetch。",
-  "32:00–33:30｜1 分 30 秒\n來源 A fetch 技術修正。fetch 是發送網路請求的 API，先回傳 Promise；網路工作本身不是 microtask，Promise 結果確定後的 then／await 後續才以 microtask 接續。先後規則不代表請求在下一次點擊前就完成。備用原稿 click 範例：button.addEventListener(\"click\", () => { state.user = user; Promise.resolve().then(() => { state.ready = true; }); }); 使用者點擊後先設定 user，再由微任務設定 ready。此例留在備註，不在主線加入 state 物件與事件 API 的額外閱讀負擔。microtask 也不能消除所有非同步資料競爭；取消、過期回應、順序控制此處不展開。",
-  "33:30–35:00｜1 分 30 秒\n用四個白話讀法結束：callback 傳要做的事，Promise 串後續成功或失敗，await 讀成等待本步結果，Event Loop 解釋執行順序。可口頭回問「multiNum 與 multiNum(8) 差在哪」「await 等待的是哪段程式」確認理解，不加入新例子。兩份教材中的細節收在講者備註，TS 20 分鐘與緩衝 5 分鐘保留。轉場：剛才回答的是程式怎麼執行；接下來看執行前，我們能先檢查哪些資料假設。",
-  `35:00–37:00｜2 分鐘｜TypeScript 01
-核心：JavaScript 決定怎麼執行；TypeScript 在執行前增加 static type checking，最後仍以 JavaScript 執行。
-講法與讀碼：先用 15 秒接上一頁的執行順序，再指左邊 add 的兩個參數、回傳型別、return。對照右邊由上到下：型別註記移除，運算仍是 a + b。用 add("1", 2) 口頭說明會收到型別診斷，不必真的執行錯誤例子。最後指回 Event Loop、Call Stack、Promise、async / await、task / microtask：加上型別不改變這些執行機制。
-易誤解：不像 JVM／CLR 裡某些型別資訊會留在 runtime；本例的 annotation 不會生成參數驗證，也不會把字串轉成數字。compile time 在此泛指執行前的靜態檢查，編輯器也能即時做；轉出 JS 與是否執行型別檢查是可分開的工具步驟。型別錯誤不等於 runtime 已經替你阻止輸入。
-不延伸：不講編譯器架構、建置工具、tsconfig、降版輸出；也不把「所有 TS 語法都只會被刪掉」當成通則。本段只使用會被移除的型別語法。
-銜接：既然型別用來提前檢查，是不是每個地方都要自己寫？下一頁用同一個 add 回答。
-參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types`,
-  `37:00–38:30｜1 分 30 秒｜TypeScript 02
-核心：TypeScript 會從程式碼推斷型別，不需要每個位置都手動 annotation。
-講法與讀碼：用約 30 秒由上到下看 userName 的字串初值、age 的數字初值，對照右欄推斷的 string、number。再用約 30 秒看 add 的 number 參數與 return a + b，問「沒有寫回傳型別，是否代表 any？」短停後指出兩個 number 相加，回傳仍推斷為 number。最後讀黃色結論，給名稱 type inference；不用在每個位置重複已知的型別。餘下時間銜接 object 的推斷。
-易誤解：省略 annotation 不等於取消型別檢查，也不等於 any；本例的初始值與函式內容已提供足夠線索。普通獨立函式的參數不會只因後面有呼叫就自動回推，所以保留 a、b 的 annotation。不主張一律刪除回傳型別，公開 API 仍可明確標示契約。
-備用（被問到才說）：本例 let userName 與 let age 推斷為 string、number；若改為 const，這兩個原始值可保留更精確的 "Kylen"、20 literal type。這是型別精確程度的補充，不列入這頁的 90 秒主線。
-不延伸：不展開 let／const 差異、literal type、widening、as const、完整 primitive type 或 contextual typing。
-銜接：TS 也能從 object 的欄位推斷結構；下一頁的 data 沒有標上 User，為什麼仍能傳給需要 User 的函式？
-參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables`,
-  `38:30–41:30｜3 分鐘｜TypeScript 03
-核心：TypeScript 主要比較 shape 的相容性，不要求 nominal identity。
-講法與讀碼：先用約 40 秒讀左欄 interface User 的 id、name，再讀 printUser 的輸入與實際使用的 name。接著讀右欄 data 的三個欄位，停在 printUser(data) 問標題問題。逐一配對 id: number、name: string，約 60 秒解釋符合函式要求就能傳入；多出的 email 不妨礙這個既有變數相容。最後給名稱 structural typing，用剩餘時間對照 Java／C# 常見的 interface nominal identity：通常需要類別正式宣告實作關係。
-易誤解：User 描述「至少需要哪些結構」，不是 object 必須正式屬於某個類別；欄位的型別也要相容，不只是名稱一樣。傳入時沒有複製、轉型或刪掉 email；在 printUser 內只知道 User 描述的成員。此處不是 runtime duck typing 的自動檢查。
-邊界提醒：直接寫 printUser({ id: 1, name: "Kylen", email: "..." }) 這種新鮮 object literal 會觸發 excess property checking；因此保留 data 變數版，口頭配合頁底提醒，不示範繞過檢查。
-不延伸：不講 class、private／protected 例外、branding、soundness 或語言理論；比較限於 Java／C# 常見的 interface 相容性，不泛指所有後端語言。
-銜接：shape 描述需要哪些欄位；但某個值本身可能有不只一種型別，下一頁看 ID。
-參考：https://www.typescriptlang.org/docs/handbook/type-compatibility.html`,
-  `41:30–43:00｜1 分 30 秒｜TypeScript 04
-核心：union 表達多種可能；在還沒區分前，操作必須對目前每一種可能都成立。
-講法與讀碼：先讀 printId 的 id: string | number，將 | 讀成「或」；再讀 console.log 與下面兩次呼叫，指出字串和數字都符合。先不背功能名稱，理解需求後再指出 union type。最後按右鍵揭露黃色問題：如果改用 id.toUpperCase() 會怎樣？停 5 秒，回答數字不保證有這個方法，因此靜態檢查會擋下。
-易誤解：不是把值同時轉成兩種型別，不是 runtime 的 | 位元運算，也不等同 any；TypeScript 仍保留這兩種可能，並約束可用操作。console.log 同時能接受字串與數字，所以本頁程式有效。
-不延伸：不加第三種型別、overload 或複雜 union；不以 type assertion 強行消除錯誤。
-銜接：與其要求 TS 相信我們，下一頁使用真的 JavaScript 判斷，確定現在進到哪個分支。
-參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#union-types`,
-  `43:00–45:30｜2 分 30 秒｜TypeScript 05
-核心：TypeScript 會依 JavaScript control flow 追蹤這一行仍可能有哪些型別，這就是 narrowing。
-講法與讀碼：由函式入口的 string | number 往下讀 typeof id === "string"。停在 if 內，問「這裡還可能是 number 嗎？」按一次右鍵揭露第一個說明：只剩 string，所以 toUpperCase 成立。再讀 else，按第二次右鍵：排除 string 後只剩 number。最後讀黃色結論，對照前半場追蹤執行時序、現在追蹤每一行可能的型別。
-易誤解：typeof 是會保留並實際執行的 JS 程式；TypeScript 在執行前分析這個條件帶來的型別資訊。narrowing 不是型別轉換，不是跑到這一行才啟動 TS 編譯器，也不是把函式參數的整體宣告永遠改成 string。
-不延伸：不加自訂 type guard、discriminated union、exhaustiveness 或 typeof null 陷阱；只用已知的 string／number 兩條路徑。
-銜接：現在已經能描述 shape、可能性與分支；下一頁整理替這些型別命名的兩種常見寫法。
-參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html`,
-  `45:30–47:30｜2 分鐘｜TypeScript 06
-核心：一般 object shape 多半能用 interface 或 type；依要表達的內容理解差異，不爭哪個比較好。
-講法與讀碼：前 50 秒由左到右比較兩個 User：先讀 interface 的 id／name，再讀 type User = { ... } 相同的欄位，指出這個 object shape 兩種寫法都能描述。兩欄是替代版本，不要貼在同一個作用域重複宣告 User。接著用約 40 秒往下讀 type ID = string | number，連回已看過的 union：type 還能替這種型別組合取名字。最後用約 30 秒讀黃色結論並轉向下一頁。只掌握這兩個使用情境，不列功能清單、不比較哪一個更高級。
-易誤解：type 也能描述 object，並非只有 interface 能用在物件；替型別取名不會建立 runtime 類別、替資料轉型或驗證 API 回應。一般 object shape 兩者都可用，不代表所有語法與行為完全相同。
-備用（被問到才說）：interface Admin extends User { permissions: string[]; } 會沿用 User 欄位並增加字串陣列 permissions，只擴充型別描述，不建立 runtime 繼承物件。interface 支援同名 declaration merging；type alias 不支援這種同名合併。type 也能命名 intersection，例如 type Admin = User & { permissions: string[]; }，表示同時滿足兩個結構；type Status = "pending" | "success" | "error" 則限定三個合法字串值。這些差異留待 Q&A，不列入本頁兩分鐘主線。
-不延伸：不現場示範 declaration merging、extends／intersection 細節、狀態機、團隊風格辯論或完整比較表。
-銜接：下一頁沿用 interface 描述 API response 的共同包裝；如果每個 endpoint 的 data 都不同，要怎麼保留它的型別？
-參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces`,
-  `47:30–50:00｜2 分 30 秒｜TypeScript 07
-核心：泛型保留可替換的型別位置，讓共同結構重用時不丟掉內部資料的型別。
-講法與讀碼：進頁先只看左側 any 版本與問題，用約 40 秒讀 ApiResponse 的 data: any 與 message，指出 any 讓 data.naem 拼錯也不報錯。第一次按右鍵揭露右邊替代版本，從 ApiResponse<T> 的 T 一路對到 data: T，再讀 response: ApiResponse<User> 與物件內容。User 沿用前面的 interface，id 是 number、name 是 string；看 data 的兩個值、message，再到最後 name.toUpperCase()，這時仍保有 string 的型別資訊。約 70 秒完成讀碼後，第二次按右鍵才揭露黃色 mental model：T 先保留一個型別的位置，實際使用時填入 User。用剩餘約 40 秒把名稱 Generics 連到聽眾熟悉的容器型別並銜接下一頁。
-易誤解：左右兩個 ApiResponse 是改寫前後，並非要同時宣告。T 是型別參數，不是呼叫時傳入的 runtime 變數；寫 ApiResponse<User> 不會建立或驗證 User。any 也不是「會安全接受所有型別」的保證，而是放寬這個位置的檢查。此頁 data 是自己在程式碼中建立，與外部 JSON 的信任程度不同。
-不延伸：不講 conditional type、infer、複雜 generic constraints、variance 或泛型函式大全。
-銜接：自己建立的 data 能檢查；如果 data 是網路回來的，我們標上 User 就真的安全了嗎？下一頁回到前半場的 fetch。
-參考：https://www.typescriptlang.org/docs/handbook/2/generics.html`,
-  `50:00–53:00｜3 分鐘｜TypeScript 08
-核心：TypeScript ≠ runtime validation；型別註記不能保證外部世界真的符合它。
-講法與讀碼：進頁只看 User 與呼叫碼，先讀 id／name，再由上往下讀兩個 await：await fetch 取得 response；await response.json() 將 JSON body 解析成 JavaScript 值，交給標成 User 的變數。約 50 秒後停在 user.name.toUpperCase()，問 API 是否一定符合宣告。第一次按右鍵揭露實際 JSON 與 runtime 結果，由 id 的字串讀到 name 的 null；JSON 語法有效但 shape 不符合 User，最後一行會拋 TypeError。停約 40 秒讓聽眾看見宣告與真實資料的落差。第二次按右鍵才揭露原因與黃色 validation 流程，再花約 60 秒解釋 response.json() 的標準 DOM 回傳型別是 Promise<any>，await 後取得的值是 any；any 可被指派成 User，所以靜態檢查通過。解析合法 JSON 與驗證 User shape 是兩件事；annotation 沒有執行驗證或轉換。最後約 30 秒帶出外部資料需經實際 schema validation，再銜接整場回顧。
-易誤解：若在程式碼直接把這份錯誤物件指派給 User，TS 本來能指出不一致；本例漏洞在外部資料與 any。不要教成 TS 對 null 或欄位型別一概無能為力。改寫成 as User 也不會補上驗證，不需要另教斷言語法。
-落地：外部資料先經可執行的 schema validation，通過後才當 User 使用，失敗就拒絕或處理錯誤。API response、localStorage、URL params、user input 都是邊界；可簡提 Zod 或 JSON Schema validator。API contract 文件、schema 本身、產生的 TS 型別都不等於驗證已經執行。
-不延伸：不做 Zod 教學、不加 HTTP 錯誤處理支線、不講驗證工具比較；講者若被問到 unknown，可口頭說它要求先檢查再使用，留待 Q&A。
-銜接：把 runtime 執行、static checking、外部資料邊界分成三個問題，最後一頁收回整場。
-參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types
-參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#any`,
-  `53:00–55:00｜2 分鐘｜TypeScript 09
-核心：JS 管執行；TS 在執行前描述與檢查 shape；外部資料的可信度由 runtime validation 建立。
-講法與讀圖：本頁沒有新程式碼，依三欄從左到右、各欄由上往下讀。左欄用約 25 秒回顧 Event Loop、Promise、async／await，回答怎麼執行。中欄用約 30 秒回顧型別、narrowing、generic，回答執行前能知道什麼。右欄約 25 秒回到 API response、localStorage、URL params、user input，回答外部資料是否符合型別。指向頁底工具名稱只作定位，不教語法。
-易誤解：三欄是互補的責任，不是所有程式都必須依左到右跑過三個階段；static checking 與 runtime validation 不能互相取代。API contract 必須有實際檢查機制，才有對應的 runtime 保證。
-不延伸：不加新 feature、工具安裝或語法補遺。用剩下約 40 秒口頭回問「加上 TypeScript 會改變 1 → 4 → 3 → 2 嗎？」「API JSON 標上 User，就已經驗證了嗎？」各等幾秒後給答案。
-收尾銜接：讀黃色結論，55:00 結束教學，剩餘 5 分鐘留給原本安排的緩衝／Q&A。第三部分合計 20 分鐘，互動停頓已計入各頁預算。`,
+  "00:00–00:30｜30 秒\n開場：聽眾已有後端開發經驗，但可以第一次接觸 JavaScript／TypeScript。今天先補足讀程式所需的 JS 寫法，再往前推一步：判斷獨立請求如何重疊等待、錯誤是否真的交給呼叫端，以及資料契約在哪裡成立。執行模型以瀏覽器主執行緒為主，不把這個簡化模型直接當成 Node.js 的所有階段。封面只交代學習目標，下一頁再安排時間。",
+  "00:30–01:00｜30 秒\n路線：非同步基礎連同開場共 18 分鐘，並行請求與錯誤傳遞 7 分鐘；Event Loop、同步計算與 JS 回顧 10 分鐘。35:00 切入 TypeScript，用 API 結果模型與 runtime 驗證串起 20 分鐘，55:00 留 5 分鐘 Q&A／緩衝。今日不是背語法清單，而是能說出程式在等什麼、失敗傳到哪裡、哪些資料假設仍需要驗證。",
+  "01:00–03:00｜2 分鐘\n核心：函式可以當參數；callback 是否非同步，取決於接收方何時呼叫它。先用 20 秒讀 multiNum：收到數字，印出它的十倍。再問 addNum(6, 2, multiNum) 的第三個參數是函式還是執行結果？答案是函式；沒有括號，不是在這裡執行 multiNum。沿 addNum 裡的 callback(a + b) 追一次：6 + 2 是 8，callback(8) 呼叫的正是 multiNum(8)，因此印 80。與右側 multiNum(8) 對照，後者會立即呼叫。本頁簡化原本條件分支，只留下傳函式與呼叫函式的差異。停 5 秒問「這裡有等稍後嗎？」答案沒有，callback 在 addNum 返回之前就完成。callback 是角色，不是非同步關鍵字。銜接：換成瀏覽器計時器，仍然傳函式，執行時間卻不同。",
+  "03:00–04:30｜1 分 30 秒\n核心：安排計時器不會暫停目前程式。先請聽眾預測三行輸出，再由上往下讀：印 1；setTimeout 收到要稍後做的函式與延遲毫秒，這裡只是安排；目前程式繼續印 4；後來 callback 才印 2。答案 1 → 4 → 2。0 毫秒不是精確執行時間，更不能打斷正在執行的同步程式。此處先建立直覺，不提前背 task／microtask 名稱。() => ... 是無參數函式。這個範例在瀏覽器的一次同步執行中觀察，不加入其他程式的輸出。",
+  "04:30–05:30｜1 分鐘\n核心：瀏覽器主執行緒同時執行一段 JS，計時與網路等待可由瀏覽器處理。Call Stack 表示目前函式呼叫的執行進度；外部工作就緒後，後續程式仍要等主執行緒能執行。問「計時器到期時，若目前同步工作還沒結束，能插隊嗎？」答案不能。範圍是主執行緒，不宣稱整個瀏覽器只有一條執行緒，也不把 JavaScript 與所有後端語言的執行方式混在一起。先記下 UI 卡住與同步工作占用的關係，後面會用 async 包住 CPU 計算檢查理解。",
+  "05:30–07:00｜1 分 30 秒\n核心：資料相依使步驟必須依序開始；callback 寫法把下一步放進成功函式裡。三個 doSomething 名稱都是示意 API，這一頁採成功與失敗 callback 介面，不是 JS 內建函式。由 result → newResult → finalResult 追一次：第二步需要第一步的結果，第三步需要第二步的結果。function(result) 是接收結果後要做的事。問「把三個呼叫放在外面一起發出，可以嗎？」答案不行，後兩步所需輸入尚未取得。每層的 failureCallback 負責接到該步失敗；本頁不展開 callback 契約實作。這裡三層還能讀，下一頁用原有圖片快速觀察更多層次的代價。",
+  "07:00–07:30｜30 秒\n核心：相依流程一層包一層，會讓閱讀與錯誤處理越來越難追。保留使用者提供的 callback hell 圖片，停 5 秒看向右擴張的縮排，再用一句話點出維護成本。不要逐行讀圖片或介紹圖片裡的套件；callback 本身仍是正常工具，不能用數量直接判定好壞。銜接：能否保留相依關係，把成功與失敗的後續攤平？下一頁會改用回傳 Promise 的 API 版本。",
+  "07:30–09:00｜1 分 30 秒\n核心：Promise 是表示工作結果的物件，API 需要真的回傳它，才可接 then／catch。左欄是 callback 介面；右欄是假設已改寫成回傳 Promise 的替代版本。後續 doSomethingElse 與 doThirdThing 同樣採 Promise 版本，不能直接在原 callback API 尾端加 .then()。成功值交給 then，失敗交給 catch；結果可能仍在 pending，也可能已經 fulfilled 或 rejected。Promise 不等於最終資料，更不代表新增 JS 執行緒。問「const promise 拿到的是網址字串嗎？」答案是 Promise 物件；成功時才經由後續處理拿到字串。下一頁短看它如何產生成功值。",
+  "09:00–10:30｜1 分 30 秒\n核心：new Promise 的 executor 立即執行，而範例中的成功值稍後提供。從 return new Promise 往內看：executor 現在安排 200ms 計時器，結束後 doSomething 才回傳 Promise。稍後計時器 callback 執行，印訊息並 resolve 網址字串；該字串就是 then 收到的結果。問「建立 Promise 就等於把 executor 移到背景嗎？」答案不是。這裡的等待來自 setTimeout，200ms 也不是精準執行時間保證。不要求聽眾記住手寫 Promise 的所有細節，不展開 resolve another Promise、thenable 或完整 callback 包裝。大部分使用端可直接接既有 Promise API。",
+  "10:30–12:00｜1 分 30 秒\n核心：then callback 收到前一步成功值；return 下一步的 Promise，才把等待與錯誤留在同一條鏈。三個 API 都已採 Promise 版本，沿 result → newResult → finalResult 讀一次。第一個 then 使用 result 呼叫第二步並 return；第二個 then 同樣接第三步；最後只印結果。問「為什麼前兩段有 return？」答案是讓外面的鏈等待下一個操作，接到其成功值或失敗。不是讓三個工作同時跑，原本資料相依仍在。若缺少 return，鏈可能提前繼續，內部失敗也可能不再沿這條鏈傳遞；只口頭提醒，不另開 detached Promise 範例。下一頁追失敗如何到尾端。",
+  "12:00–13:00｜1 分鐘\n核心：這條鏈的 then 都只有成功處理；中途 throw 或返回 rejected Promise，會跳過後續成功 callback，交給末端 catch。假設第二步失敗，問第三步會不會被呼叫？答案不會，成功輸出也跳過。failureCallback 在此只是接收錯誤的示意處理器，沒有宣稱它一定讓整條鏈繼續失敗；這正是稍後要追的問題。先記住錯誤到達 catch 的路徑，不在此提前背 catch 的所有回傳規則。",
+  "13:00–15:30｜2 分 30 秒\n核心：async／await 把同一個 Promise 相依流程寫成由上往下；呼叫 async 函式仍拿到 Promise。用約 50 秒對照前面 chain：每個 await 取得成功值，再傳給下一步；原來的相依關係完全保留。try 中的 await 若遇到 rejection，就以丟出錯誤的方式進入 catch，後續相依步驟跳過；同步 throw 也會被這個 try/catch 接到。用約 40 秒問「foo() 直接回傳 finalResult 嗎？」答案不是，是 Promise；這個範例沒有 return finalResult，正常結束的成功值是 undefined。failureCallback 若正常返回，catch 結束後 foo 也會恢復成功；若它拋錯，foo 才會 rejected。先點出這個待會會展開的差異，避免誤教 catch 只要印錯誤就自動向上傳播。本頁只宣告函式，沒有真的發出工作。剩餘時間銜接：await 到底暫停誰？\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
+  "15:30–18:00｜2 分 30 秒\n核心：foo 先同步執行到第一個 await；等待的是 foo 的後續，呼叫端先取得 Promise 再繼續。先解釋 Promise.resolve() 得到已成功完成的 Promise，沒有額外網路等待。請聽眾先投票 A、B、C 的順序，再按三次右鍵：第一步進入 foo 先印 A；到 await 後暫停 foo 的後續，const work 拿到 Promise，呼叫端印 B；目前同步程式結束後，才接續印 C。答案 A → B → C。即使被 await 的 Promise 已完成，後續也不會在這一行立刻繼續。work 仍是代表 foo 完成的 Promise，不是字串，也不是外部請求資料。不把 async 當開執行緒，await 也不是阻塞整個主執行緒。最後用 20 秒提問：如果有兩個互不相依的工作，真的需要等第一個結束才發第二個嗎？\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
+  "18:00–19:30｜1 分 30 秒\n核心：兩個獨立的 I/O 等待可重疊；差別在發出工作的時機。getUser／getOrders 是示意 Promise API，假設呼叫時立即啟動請求、userId 已知、兩者獨立，且都成功。兩欄都是 async 函式內的替代片段，不是一起執行。先讓聽眾估算 200ms 與 300ms：左邊第一個 await 後才發第二個，約 500ms；右邊求值陣列時依序快速呼叫兩個 API，再由 Promise.all 彙整，理想約 300ms。JS 呼叫本身仍有先後，重疊的是外部等待，不是同時執行兩段同步 JS。數字忽略啟動、排程、服務競爭等成本，不能當真實效能保證。[user, orders] 是依輸入順序取回陣列結果，不是依完成順序；用 10 秒讀過即可。Promise.all 本身不負責啟動這些函式，傳入的是已呼叫後回傳的 Promise。\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all",
+  "19:30–21:00｜1 分 30 秒\n核心：能否並行，先看資料與業務相依，再看資源限制。這頁特意改變 API 契約：getOrders 現在需要 getUser 查回來的 user.accountId，不是上一頁已知的 userId。先請聽眾指出還沒知道的值，答案是 accountId，因此兩個呼叫不能原樣一起發出。畫面是 async 函式內的相依範例，省略錯誤處理但沒有取消錯誤傳遞。再問「輸入都已知，就一定該同時執行嗎？」答案還要看副作用順序，例如確認付款成功才能出貨，以及限流、連線／資源容量。本課只比較兩個請求，不推廣成把大量資料全部丟進 Promise.all；可限制並行數是後續工程設計議題。",
+  "21:00–22:30｜1 分 30 秒\n核心：Promise.all 在任一輸入失敗時，以該錯誤 reject；其他已啟動的工作不會因此被自動取消。沿時間走：0ms 發出兩個請求；假設使用者請求 200ms reject，整組就可讓等待它的呼叫端進入 catch；訂單請求仍可能在 300ms 完成。問「catch 執行了，代表伺服器另一項工作停止嗎？」答案不代表。fail-fast 是整組 Promise 的失敗時機，不是 transaction、取消或 rollback。若確實需要取消，可再設計支援取消的 API／AbortSignal；即使取消客戶端等待也不等於撤銷已發生的伺服器副作用，此處不展開 API。若業務需要所有成功與失敗結果，Promise.allSettled 是選項，先給名稱不用再讀一段語法。下一頁追收到錯誤後，自己的 catch 對呼叫端造成什麼影響。\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all",
+  "22:30–25:00｜2 分 30 秒\n核心：catch 回傳的是新的 Promise；handler 的回傳與拋錯決定後續狀態。假設兩欄 getUser 都 reject，console.error 成功且不拋錯。先問「兩欄都印出錯誤，呼叫端看到的狀態一樣嗎？」停 10 秒。左邊 handler 正常結束、沒有 return，所以新的 Promise 以 undefined fulfilled；右邊重新 throw 原錯誤，所以新的 Promise rejected。不是把 getUser 原本失敗的 Promise 改成成功，而是後續鏈已恢復。接回 async 範例：async 函式的 catch 正常返回，也會讓函式回傳的 Promise 成功；throw 才把失敗繼續交上去。工程判斷：這層能給有意義的備援值，可 return 該值；不能履行契約時，throw 交上層處理，避免只記錄就讓呼叫端誤當成功。若 catch 回傳另一個 Promise，後續會跟隨其結果，不是所有 return 都立即成功；本頁只比較正常返回 undefined 與同步 throw。範例為了展示只印 log，但實務要選定紀錄責任，避免每層重複紀錄同一錯誤。\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/catch",
+  "25:00–26:30｜1 分 30 秒\n核心：外部條件就緒後的後續程式，會以不同類型的工作排程。左側 task 對應先前 timer 印 2；右側 microtask 對應 then callback 與 await 後印 C。queue 是等待執行的工作，pending Promise 並不是不斷在 microtask 佇列裡輪詢；它的結果確定，相關後續才有機會排入。請聽眾配對：「setTimeout callback 是哪類？await 後面是哪類？」答案依序為 task、microtask。不要求背更多 API；macrotask 是常見稱呼，規範的名詞是 task。Promise executor 仍是同步執行，不能把所有包含 Promise 的程式都說成 microtask。\n參考：https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide",
+  "26:30–27:30｜1 分鐘\n核心：用瀏覽器簡化模型讀順序：目前 task 的同步程式完成，進到 microtask checkpoint，清空微任務後才繼續下一個 task。清空包含執行途中新增的 microtask，因此不斷產生微任務也可能延後其他工作與繪製。問「把工作丟進 microtask，就保證畫面先更新嗎？」答案不保證。瀏覽器是否繪製還取決於 rendering opportunity，此圖不是完整規範排程圖。不同 task 來源不存在此頁承諾的單一全域 FIFO，不把 timer、使用者事件、網路 callback 任意混排出保證順序。接著只用同一段 script、單一 timer 與已完成 Promise 來追。\n參考：https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide",
+  "27:30–29:30｜2 分鐘\n核心：先完成同步程式，再處理已排入的 Promise 後續，最後執行本例的 timer callback。先留 15 秒讓聽眾自己預測，再按四次右鍵逐步揭露：直接印 1；timer 只安排稍後，then 也只安排 microtask，接著直接印 4；script 結束後 microtask 印 3；最後 timer task 印 2。答案 1 → 4 → 3 → 2。每次揭露都請聽眾說它屬於哪一類，不只是背數字。Promise.resolve() 已 fulfilled 也不會同步呼叫 then。這個例子不含未完成的網路請求，也沒有其他程式輸出；不能推論所有 Promise 都比任意 timer 更早完成。",
+  "29:30–31:00｜1 分 30 秒\n核心：fetch 的網路工作與 Promise 後續是不同階段。fetch 呼叫發起瀏覽器處理的請求，先回傳 Promise；其結果確定後，相應的 then／await 後續才以 microtask 執行。問「網路請求本身是 microtask，所以一定比計時器快嗎？」答案不是，網路多久完成與已準備好後續的排程要分開判斷。補充邊界：fetch 的 Promise 在回應可用時 fulfilled，不等於 response body 已全部讀完；response.json() 也回傳 Promise。HTTP 404／500 通常不會自動讓 fetch reject，應檢查 response.ok；網路錯誤等才會 reject。這些只作講者備用，避免引入新語法打斷主線。銜接：外部等待可以交給瀏覽器，那自己的同步計算能靠 async 解決嗎？",
+  "31:00–33:00｜2 分鐘\n核心：async 不會把同步計算搬到別的執行緒。假設 crunch() 是會正常返回的耗時同步函式；先讓聽眾判斷 next 是先印，還是要等計算完。按第一步揭露答案：buildReport 呼叫後先同步執行 crunch，完成才把結果包在 Promise 裡回傳，所以 next 要等。即使呼叫端沒有 await，也已經被前面的同步運算拖住，畫面互動也可能被阻塞。按第二步討論作法：適合的 CPU 計算可移到 Web Worker，或切批，並在批次間透過合適的排程方式讓出執行機會；不在此引入 Worker 實作。問「在 crunch 前面加 await Promise.resolve() 就能保證不卡嗎？」答案不行，它只把後續安排成 microtask，計算仍在主執行緒，還可能在繪製之前執行。不必以此推論所有 await 都毫無價值，重點是區分等待 I/O 與實際消耗 CPU。\n參考：https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function\n參考：https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide",
+  "33:00–35:00｜2 分鐘\n用四個工程提問回顧，不加新語法。請不同聽眾各答一句：一、兩個各需 200／300ms 的獨立請求，先發再等理想約多久？約 300ms，但有相依或資源限制就不能直接套用。二、catch 只 log 並正常結束，上層看到什麼？新的 Promise 成功，值 undefined；throw 才繼續失敗。三、fetch 網路工作是不是 microtask？不是，結果確定後的 then／await 接續才是。四、把同步計算包進 async 會自動解決卡住嗎？不會，計算仍占住目前執行緒。若卡住，可回到 callback 是傳函式、Promise 是結果物件、await 暫停目前函式後續這三句定位，別多開例子。35:00 轉場：執行時序與失敗語意已經知道，接下來資料的成功／失敗狀態如何寫進契約？哪些檢查在執行前完成，哪些仍要 runtime 驗證？",
+  "35:00–36:30｜1 分 30 秒｜執行前的型別檢查\n核心：TypeScript 增加靜態型別檢查；本例移除型別註記後，仍按剛才的 JavaScript 模型執行。\n講法：先花 30 秒對照左右 add，指出參數與回傳值的 number 會移除，a + b 仍保留。問「add(\"1\", 2) 能通過型別檢查嗎？」等 5 秒，答案是不行，第一個參數是 string。再花 25 秒連回 Event Loop、Promise、async／await：型別不會改變它們的執行順序。最後 30 秒讀黃色結論，將注意力轉到檢查發生的時機。\n邊界：這些 annotation 不會自動生成 runtime 驗證，也不會把字串轉成數字。執行前檢查包括編輯器與型別檢查器；輸出 JS 與檢查型別可由不同工具完成，不能把型別錯誤當成 runtime 防護。本頁只討論會移除的型別語法，不宣稱所有 TS 語法都只會被刪掉。\n銜接：知道型別能提前檢查後，下一頁回答哪些地方需要手寫型別。\n參考：https://www.typescriptlang.org/docs/handbook/2/basic-types.html#erased-types",
+  "36:30–37:30｜1 分鐘｜Type inference\n核心：省略 annotation 不代表 any；程式碼已經提供足夠線索時，TS 會推斷型別。\n講法：前 20 秒由 userName 的字串初值、age 的數字初值，對到 string、number。再花 20 秒看 add 的兩個 number 參數，問「沒寫回傳型別，是否代表回傳 any？」停 5 秒後回答：不是，a + b 的結果推斷為 number。最後 15 秒說明局部值可交給 inference，對外函式仍可明確標示回傳契約。\n邊界：普通獨立函式的參數不會只因後面有人呼叫就回推，所以保留 a、b 的 annotation。不展開 literal widening、const、contextual typing 或 tsconfig。\n銜接：物件也能從欄位推斷出 shape；接下來的 data 沒寫 User，也可能符合需要 User 的函式。\n參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables",
+  "37:30–39:30｜2 分鐘｜Structural typing\n核心：TypeScript 主要比較所需 shape 的相容性，不要求物件先正式宣告屬於某個型別。\n講法：先用 30 秒讀 User 的 id: number、name: string 與 printUser。再看 data 的三個欄位，問「沒有 implements User，printUser(data) 為什麼可以？」停 5 秒，逐一配對 id、name 都存在且型別相容。用約 40 秒對照 Java／C# 常見的 interface 身分判定：TS 在此看結構，多出的 email 不妨礙既有變數相容。最後約 45 秒說明頁底的 object literal 邊界與下一頁命名方式。\n邊界：不是 runtime 自動做 duck typing 檢查，也沒有複製、轉型或刪掉 email；函式內只知道 User 宣告的成員。直接把新寫的 object literal 傳進去，會有 excess property checking，因此此例刻意用既有 data 變數。不能推論任何額外欄位都永遠被接受。\n不延伸：不講 branding、private／protected 例外或 soundness；與後端語言比較只限 Java／C# 常見情境。\n銜接：接下來用一分鐘整理 interface 與 type，之後整段都沿用同一個 User。\n參考：https://www.typescriptlang.org/docs/handbook/type-compatibility.html",
+  "39:30–40:30｜1 分鐘｜Interface 與 type\n核心：User 這個一般物件 shape，用 interface 或 type 都可以；後續用 type 命名聯合型別。\n講法：用 25 秒左右對照同樣的 id、name，指出只是兩種替代寫法，不要在同一作用域重複宣告兩個 User。問「type User 會在 runtime 建立一個 User 類別嗎？」停 5 秒，答案是不會；它只是型別的名字。再用 20 秒交代後面沿用左邊的 interface User，而 type 用來描述「成功或失敗」。最後 10 秒銜接 API 結果。\n邊界：兩者對一般 object shape 經常都能用，不表示所有功能完全相同。declaration merging、extends、intersection 留待被問到時再補，不列入主線。不把命名型別當成轉型或驗證。\n銜接：一個 API 結果可能成功，也可能失敗；用 union 把兩種結構分清楚。\n參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces",
+  "40:30–42:30｜2 分鐘｜用 API 結果理解 union\n核心：聯合型別描述兩種可能的結構：成功有 User，失敗有錯誤訊息。\n講法：先用 40 秒讀 type UserResult，將 | 讀成「或」。逐一指出 ok: true 與 data: User 成一組，ok: false 與 error: string 成另一組。這裡的 true／false 是特定值的型別，保留了欄位間的關聯；如果只有 ok: boolean 加上兩個 optional 欄位，就沒有同樣清楚的保證。這個對比只口頭提一句，不額外寫第三種模型。\n互動：用約 25 秒確認成功分支保證哪些欄位，然後按右鍵揭露問題：「還沒判斷 ok，可以直接讀 result.data 嗎？」停 5 秒。答案是不行，因為可能是失敗分支，根本不保證有 data。剩餘 50 秒用問題帶到下一頁的 if。\n邊界：這是我們在程式中約定的 service 結果模型，不是 fetch 的 Response 或 JavaScript 的 Promise 狀態；ok: false 不代表 Promise 必然 rejected。Union 不會在 runtime 驗證外部 JSON，也不會移除額外欄位；此處只講每個分支保證可用哪些欄位。\n銜接：用真正會執行的 if 判斷 ok，讓 TS 知道現在是哪個分支。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+  "42:30–44:30｜2 分鐘｜Narrowing 與 discriminated union\n核心：共同欄位 ok 的特定值，可以區分 union；TS 跟著 if／else，確認每一行能讀取的欄位。\n講法：先花 30 秒從 showUser 的 UserResult 輸入讀到 if (result.ok)。問「這裡還可能是失敗結果嗎？」停 5 秒後按右鍵揭露成功說明：不可能，所以 data 是 User、name 是 string，可以用 toUpperCase()。再花 30 秒讀 else，第二次揭露：ok 是 false，所以 error 是 string，這裡不能直接取 data。\n互動：用約 20 秒追問「如果把 result.data.name 放到 if 前面，會怎樣？」答案是型別檢查會指出 data 不是每一個分支都有。最後約 35 秒讀黃色結論並命名 discriminated union：共用一個欄位，但它的特定值會分辨不同結構。\n邊界：if 是保留並執行的 JavaScript；TS 在執行前分析這條控制流程。Narrowing 不會替資料轉型，也不會把所有外部值驗證成 User。範例在 strict 型別檢查下使用；不用 as 強制跳過檢查。\n銜接：如果使用者清單也需要相同成功／失敗包裝，下一頁讓成功資料型別可替換。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+  "44:30–46:30｜2 分鐘｜同一個 ApiResult<T>\n核心：泛型把成功資料的型別保留下來；union 的成功／失敗關係保持不變。\n講法：先用 40 秒把上一頁 UserResult 的 User 換成 T，讀 ApiResult<T>：成功的 data 是 T，失敗的 error 仍是 string。再用 30 秒讀兩個實例，ApiResult<User> 的成功資料是一個 User；ApiResult<User[]> 的成功資料是 User 陣列，[] 在這裡表示陣列型別。UserResult 這行是改寫先前的定義，不是在同一作用域宣告第二個同名 alias。\n互動：問「對 ApiResult<User[]>，是不是一拿到 result 就能讀 data.length？」停 5 秒。答案是仍要先判斷 ok；成功分支才保證 data 是陣列。若直接使用 any，就失去這個位置的檢查，例如 data.naem 拼錯也可能不被阻止。最後約 45 秒連回 T 只是可替換的型別位置，並轉向資料來源。\n邊界：T 不是 runtime 參數，寫 ApiResult<User> 不會建立、轉型或驗證 User。泛型仍需遵守已經看過的 narrowing；不教 conditional types、infer 或複雜約束。\n銜接：如果 User 是我們自己建立，TS 看得見欄位；如果它來自網路，這些保證從哪裡來？\n參考：https://www.typescriptlang.org/docs/handbook/2/generics.html",
+  "46:30–48:00｜1 分 30 秒｜未知外部資料\n核心：合法 JSON 與符合 User shape 是兩件事；unknown 要求先檢查，卻不會自己執行驗證。\n講法：先用 25 秒指右側回應，問「這是合法 JSON 嗎？符合 User 嗎？」等 5 秒，答案是 JSON 語法合法，但 id 是字串、name 是 null，與 User 不符。接著用 30 秒讀左側 const raw: unknown = await response.json()，強調將值接到 unknown，會阻止我們未檢查就讀 raw.name。對照舊寫法 const user: User = await response.json()：標準 DOM 型別讓解析結果成為 any，any 能指派給 User，所以編譯時可通過，卻沒有驗證。改用 unknown 就是主動把這條寬鬆路徑截住，要求後續先檢查；換成 as User 也不會多出驗證。\n邊界：這段節錄假設 HTTP 已成功；下一頁之後會補完整邊界。標準 DOM 型別的 response.json() 回傳 Promise<any>，將 await 後的值明確接成 unknown，可以避免 any 繼續向內傳。unknown 接受任何值，但它是靜態型別，並不是驗證器。response.json() 只解析 JSON；非法 JSON 仍可能拋錯。\n銜接：最後 30 秒讀底部流程：外部 JSON → unknown → 真的執行欄位檢查 → User。下一頁打開檢查函式，不把解法停在名詞。\n參考：https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown",
+  "48:00–51:00｜3 分鐘｜parseUser 的實際欄位檢查\n核心：以實際 JavaScript 條件拒絕不符合 User 的值；只有檢查通過才回傳 User。\n講法：先花 30 秒讀輸入 unknown、回傳 User，指出回傳註記是要達成的契約，真正的驗證在函式內。接著花 70 秒逐段看條件：typeof 確認物件且排除 null；in 確認欄位存在；再檢查 id 的 typeof 是 number、name 的 typeof 是 string。|| 是「任一不符合就失敗」，短路會讓前面不符合時停止，不會對 null 再做 in。typeof null 會得到 object，因此必須另外排除 null。\n互動：用 30 秒問兩個輸入結果：{ id: 1, name: \"Kylen\" } 會回傳 User；{ id: \"ABC\", name: null } 會拋 Invalid User，不會走到 return。缺少 name 也會失敗。可讓聽眾各說一個拒絕原因。\n講法續：再花 30 秒看最後 return，它建立一個只含已確認 id 與 name 的新物件。TS 沿檢查流程知道這兩個欄位型別，這裡沒有使用型別斷言或虛假的 type predicate。最後 20 秒提醒此頁的 throw 還需要上層接住。\n邊界：此例只落實 User 的兩個欄位型別；不承諾 id 為正整數、name 非空、唯一性、權限或完整業務規則。那些若是契約，需另加檢查。in 可以看見繼承欄位；這不是嚴格限定 plain object 或自有屬性的完整 schema validator，重點是檢查來源為 JSON 的最小 User shape。正式系統可用 schema 工具集中維護，但這裡不新增依賴或教工具語法。\n銜接：下一頁把 HTTP、JSON 解析、這個驗證函式串起來，並明確處理成功與失敗。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
+  "51:00–53:30｜2 分 30 秒｜邊界回傳 ApiResult<User>\n核心：驗證成功才產生 ok: true；失敗在這層轉成明確的 ok: false，讓呼叫端處理。\n講法：先用 30 秒定位 loadUser(): Promise<ApiResult<User>>：async 函式回 Promise，await 後拿到我們定義的結果；endpoint 本身回的是 User JSON，ApiResult 包裝由這個函式建立。接著用 45 秒由上到下讀 try：fetch 取得 Response，先檢查 response.ok；解析 JSON 並接成 unknown；parseUser 通過後才放入 data。response.ok 是 HTTP 是否為 2xx，與回傳物件上的 ok 分屬不同物件，命名相同但角色不同。\n互動：問「如果 HTTP 200，但 name 是 null，最後會走哪裡？」停 5 秒，答案是 parseUser 拋錯，進 catch，回傳 ok: false。用約 25 秒列出四種失敗來源：網路拒絕、非 2xx 的 HTTP、JSON 語法錯誤、User shape 不符。fetch 不會只因 404／500 自動 reject，因此 HTTP 判斷不可省略。\n錯誤責任：再用 30 秒連回前半場 catch：這裡刻意把錯誤轉為有型別的結果，不是只 log 後回 undefined。catch 正常回傳後，Promise 是 fulfilled；呼叫端必須檢查 result.ok，才能使用 data 或顯示 error。可以口頭說 await loadUser() 的結果直接交給之前的 showUser，兩者契約相同。不要把 fulfilled 當成業務成功。\n邊界：這是教學用的統一錯誤訊息，原始錯誤記錄在 console；實際服務可依需求分類或交給上層。假設 console.error 本身正常執行。不展開 timeout、取消、重試或 HTTP 錯誤分類，以維持 20 分鐘主線。\n銜接：最後 15 秒指出 API 結果模型、narrowing、generic、unknown 與 runtime validation 現在串成同一條流程，進入全場回顧。\n參考：https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#checking_response_status",
+  "53:30–55:00｜1 分 30 秒｜整場回顧\n核心：後端工程師讀 JS／TS 時，持續問三件事：工作是否相依、錯誤交給誰、資料是否真的符合契約。\n講法：用 20 秒讀第一欄，相依工作仍要依序，獨立 I/O 才考慮並行；Promise.all 失敗不會替其他工作取消。再用 20 秒讀第二欄，async 不會把同步計算搬到另一個執行緒；await 暫停目前函式的後續，Promise 後續仍循 microtask 規則。用 20 秒讀第三欄：union 描述成功與失敗，generic 保留 data 的型別；外部資料需要可執行的檢查。\n互動：剩餘 30 秒快速問「catch 回 ok: false，Promise 是 rejected 嗎？」答案是否，正常 return 會 fulfilled；再問「把 API JSON 標成 User 就完成驗證了嗎？」答案是否，必須實際執行 parseUser 這類檢查。讀黃色行動句完成教學。\n邊界：靜態型別檢查與 runtime validation 是互補責任；並行與額外執行緒也不是同一件事。不要在回顧加入新工具或新語法。\n收尾：55:00 結束主線，55:00–60:00 保留原訂 5 分鐘 Q&A／緩衝。TypeScript 段含本頁共 20 分鐘，互動停頓已包含在各頁配時。"
 ];
 
 export default [
@@ -827,10 +766,12 @@ export default [
   TypeScriptBoundary,
   TypeInference,
   StructuralTyping,
+  InterfaceAndType,
   UnionType,
   TypeNarrowing,
-  InterfaceAndType,
   GenericResponse,
   RuntimeValidation,
+  ParseUser,
+  ValidateAtBoundary,
   FullSessionRecap
 ] satisfies Page[];

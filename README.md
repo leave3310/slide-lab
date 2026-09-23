@@ -19,6 +19,38 @@ Then open the dev server and edit `slides/getting-started/index.tsx`, or create 
 | `pnpm build` | Build a static bundle you can deploy. |
 | `pnpm preview` | Preview the built bundle locally. |
 
+## Deploying to GitHub Pages
+
+In the repository's **Settings → Pages**, set **Source** to **GitHub Actions**.
+Push to `main`, or run **Deploy to GitHub Pages** manually from the Actions tab.
+The workflow builds and uploads `dist/`; generated files do not need to be committed.
+
+The Pages build reads the site's base path from GitHub, so both URLs are supported:
+
+| Site URL | Build base |
+| --- | --- |
+| `https://leave3310.github.io/event-loop-to-ts/` | `/event-loop-to-ts/` |
+| `https://slides.itskylen.com/` (after configuring the custom domain) | `/` |
+
+After changing the custom domain in Pages settings, rerun the workflow to rebuild
+asset URLs and the router base. No source changes are needed for that switch.
+Local `pnpm dev`, `pnpm build`, and `pnpm preview` retain their existing configuration.
+
+To reproduce the project-site build locally:
+
+```bash
+PAGES_BASE_PATH=/event-loop-to-ts/ node scripts/build-pages.mjs
+```
+
+For a custom domain at the root, use `PAGES_BASE_PATH=/` instead. The script defaults
+to `/` when the variable is unset. To preview a Pages build with the existing
+`pnpm preview` command, use the root-domain build; project-subpath builds need a
+preview server configured with the matching base path.
+
+The Pages build also copies `index.html` to `404.html` so opening or refreshing a
+slide URL can render the React app. GitHub Pages still returns HTTP 404 for those
+fallback requests.
+
 ## Authoring a slide
 
 ```tsx

@@ -99,73 +99,51 @@ const Process = ({ n, title, children, accent = false }: { n: string; title: str
   </div>
 );
 
-// The teaching order introduces functions and Promise before using them to explain the event loop.
-// JavaScript examples adapt the two supplied notes; TypeScript and async trace examples support this workshop.
+// The teaching order connects asynchronous execution, error handling, and data contracts.
+
 const Cover: Page = () => (
   <section style={root}>
     <div style={{ position: 'absolute', top: 128, left: 120, ...label, color: muted }}>DAY 01 / 給初次接觸 JS 的後端工程師 / KYLEN</div>
     <div aria-hidden="true" style={{ position: 'absolute', top: 270, right: 120, width: 260, height: 420, background: yellow, display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', padding: 24, boxSizing: 'border-box', fontFamily: mono, fontSize: 110, fontWeight: 800, color: '#252620' }}>JS</div>
     <h1 style={{ position: 'absolute', top: 298, left: 120, maxWidth: 1350, margin: 0, fontFamily: 'var(--osd-font-display)', fontSize: 'var(--osd-size-hero)', fontWeight: 850, lineHeight: 1.15, letterSpacing: -5 }}>JavaScript 執行<br />TypeScript 型別</h1>
-    <p style={{ position: 'absolute', left: 126, top: 742, margin: 0, fontSize: 36, lineHeight: 1.5, color: muted }}>從非同步流程與執行順序，到執行前的資料型別檢查。</p>
+    <p style={{ position: 'absolute', left: 126, top: 742, margin: 0, fontSize: 36, lineHeight: 1.5, color: muted }}>判斷非同步效能、錯誤傳遞，以及資料契約是否可靠。</p>
     <Footer section="從 Event Loop 到 TypeScript" />
   </section>
 );
 
 const Agenda: Page = () => (
-  <Frame eyebrow="今天的路線" title="從怎麼寫、何時執行，到執行前的檢查。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
+  <Frame eyebrow="今天的路線 / 60 分鐘" title="讀懂語法，再判斷工程上的取捨。" section="JAVASCRIPT → TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 20 }}>
-      <Process n="01 / 非同步流程" title="非同步流程怎麼寫？">Callback / Promise<br />async / await</Process><Arrow />
-      <Process n="02 / 執行順序" title="程式何時執行？">Event Loop<br />task / microtask</Process><Arrow />
-      <Process n="03 / 型別檢查" title="執行前能檢查什麼？" accent>TypeScript<br />資料的 shape 與型別</Process>
+      <Process n="01 / 非同步流程 · 25 MIN" title="怎麼寫，怎麼取捨？">基礎寫法 18 分鐘<br />並行與錯誤 7 分鐘</Process><Arrow />
+      <Process n="02 / 執行順序 · 10 MIN" title="何時執行，誰被卡住？">Event Loop<br />非同步與同步計算</Process><Arrow />
+      <Process n="03 / 型別契約 · 20 MIN" title="哪些資料假設可信？" accent>API 結果建模<br />型別檢查與 runtime 驗證</Process>
     </div>
-    <Strip style={{ marginTop: 58 }}>前兩部分約 35 分鐘 · TypeScript 約 20 分鐘 · 緩衝 5 分鐘</Strip>
+    <Strip style={{ marginTop: 58 }}>JavaScript 35 分鐘 · TypeScript 20 分鐘 · Q&A／緩衝 5 分鐘</Strip>
   </Frame>
 );
 
-const ReadFunction: Page = () => (
-  <Frame eyebrow="01 / 先看懂函式" title="這個函式：收一個數字，印出它的十倍。" titleSize={70} section="讀懂範例">
-    <Code title="教材的 multiNum 函式" size={40}>{`const multiNum = (num) => console.log(num * 10);`}</Code>
-    <Strip style={{ marginTop: 56 }}>箭頭函式的讀法：收到 num → 印出 num × 10。</Strip>
-    <p style={{ ...body, color: muted, marginTop: 36 }}>這一行先建立函式；呼叫 multiNum(8) 時，才會印出 80。</p>
-  </Frame>
-);
+const CallbackBasics: Page = () => (
+  <Frame eyebrow="01 / 用一個例子看懂 CALLBACK" title="傳函式，與現在呼叫函式，是兩件事。" titleSize={70} section="CALLBACK">
+    <div style={{ display: 'grid', gridTemplateColumns: '1060px 1fr', gap: 64 }}>
+      <Code title="把 multiNum 當成 callback 傳入" size={32}>{`const multiNum = num => console.log(num * 10);
 
-const PassFunction: Page = () => (
-  <Frame eyebrow="01 / CALLBACK 是什麼" title="函式也能當參數：把要做的事傳進去。" titleSize={70} section="CALLBACK">
-    <Code title="先看呼叫端" size={48}>{`addNum(6, 2, multiNum);`}</Code>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, marginTop: 50 }}>
-      <Note tag="multiNum" title="把函式傳過去">這裡交給 addNum，<br />由它決定何時呼叫。</Note>
-      <Note tag="multiNum(8)" title="現在呼叫函式">立刻印出 80。<br />這是另一個動作。</Note>
-    </div>
-    <Strip style={{ marginTop: 28 }}>callback（回呼）：傳進去、讓對方在需要時呼叫的函式。</Strip>
-  </Frame>
-);
-
-const CallbackTrace: Page = () => (
-  <Frame eyebrow="01 / 沿著一次呼叫看" title="這次 callback(8)，就是呼叫 multiNum(8)。" titleSize={70} section="CALLBACK">
-    <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 64 }}>
-      <Code size={34} title="callback 參數會接到剛才的 multiNum">{`const addNum = (a, b, callback) => {
-  const plusNum = a + b;
-  if (plusNum > 5) {
-    callback(plusNum);
-  } else {
-    console.log('the plusNum <= 5');
-  }
-};
+function addNum(a, b, callback) {
+  callback(a + b);
+}
 addNum(6, 2, multiNum);`}</Code>
-      <div style={{ display: 'grid', alignContent: 'start', gap: 36 }}>
-        <Note tag="① 相加，再判斷" title={<>6 + 2 = 8<br />8 &gt; 5</>} />
-        <div style={{ padding: 28, background: yellow }}><div style={{ ...label, marginBottom: 16 }}>② callback(8)</div><div style={{ fontSize: 36, lineHeight: 1.5 }}>執行 multiNum(8)<br />印出 <strong style={{ fontFamily: mono, fontSize: 52 }}>80</strong></div></div>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 28 }}>
+        <Note tag="multiNum" title="把函式交出去">由 addNum 決定何時呼叫。</Note>
+        <Note tag="multiNum(8)" title="立刻呼叫，印出 80">此例 callback(8) 就是它。</Note>
       </div>
     </div>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 20 }}>這一例會直接呼叫 callback；callback 這個名稱，本身不代表非同步。</p>
+    <Strip style={{ marginTop: 28 }}>這個 callback 直接執行；callback 本身不代表非同步。</Strip>
   </Frame>
 );
 
 const TimerCallback: Page = () => (
   <Frame eyebrow="01 / 從直接呼叫，到稍後執行" title="setTimeout：先安排，稍後再呼叫函式。" titleSize={70} section="同步與非同步">
     <div style={{ display: 'grid', gridTemplateColumns: '1070px 1fr', gap: 64 }}>
-      <Code size={36} title="先從 Event Loop 範例抽出三行">{`console.log("1");
+      <Code size={36} title="相同的傳函式方式，這次交給計時器">{`console.log("1");
 setTimeout(() => console.log("2"), 0);
 console.log("4");`}</Code>
       <Note tag="setTimeout(函式, 延遲毫秒)" title="把計時交給瀏覽器">() =&gt; ... 是沒有參數的函式。<br /><br />到時候要做的事：<br />印出 2。</Note>
@@ -195,28 +173,16 @@ const MainThread: Page = () => (
   </Frame>
 );
 
-const DependentWork: Page = () => (
-  <Frame eyebrow="01 / 你熟悉的相依流程" title="第二步，要用第一步的結果。" section="相依工作">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 20 }}>
-      <Process n="doSomething" title="第一步">取得 result。</Process><Arrow />
-      <Process n="doSomethingElse" title="第二步">使用 result，<br />產生 newResult。</Process><Arrow />
-      <Process n="doThirdThing" title="第三步" accent>使用 newResult，<br />產生 finalResult。</Process>
-    </div>
-    <p style={{ ...body, marginTop: 52 }}>如果每一步都要等工作完成，要怎麼把「接下來做什麼」寫清楚？</p>
-    <p style={{ fontSize: 26, color: muted, marginTop: 30 }}>這三個名稱是教材的示意函式；不是 JavaScript 內建 API。</p>
-  </Frame>
-);
-
-const CallbackHell: Page = () => (
-  <Frame eyebrow="01 / CALLBACK：把下一步放進去" title="完成第一步後，再做第二步、第三步。" titleSize={72} section="CALLBACK">
-    <Code size={32} title="原版 API：成功與失敗都透過 callback 通知">{`doSomething(function (result) {
+const DependentCallbacks: Page = () => (
+  <Frame eyebrow="01 / 相依流程：把下一步放進 CALLBACK" title="第二步需要第一步的結果，必須依序做。" titleSize={72} section="CALLBACK">
+    <Code size={30} title="原版 API：成功與失敗都透過 callback 通知">{`doSomething(function (result) {
   doSomethingElse(result, function (newResult) {
     doThirdThing(newResult, function (finalResult) {
       console.log(\`Got the final result: \${finalResult}\`);
     }, failureCallback);
   }, failureCallback);
 }, failureCallback);`}</Code>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 38 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 30 }}>
       <p style={{ ...body, fontSize: 32 }}><strong>成功：往內一層，做下一步。</strong><br />步驟越多，縮排越深：callback hell。</p>
       <p style={{ ...body, fontSize: 32 }}><strong>失敗：呼叫 failureCallback。</strong><br />這是教材中負責處理錯誤的函式。</p>
     </div>
@@ -253,19 +219,6 @@ promise
   </Frame>
 );
 
-const ReadThen: Page = () => (
-  <Frame eyebrow="01 / 先看一個 .then()" title="then 裡的函式，收到上一步成功的結果。" titleSize={68} section="PROMISE">
-    <Code size={42} title="從完整 Promise chain 抽出第一段">{`doSomething()
-  .then(function (result) {
-    return doSomethingElse(result);
-  });`}</Code>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 44 }}>
-      <Note tag="function (result) { ... }" title="這也是一個 callback">result 是上一步交過來的值。</Note>
-      <Note tag="return doSomethingElse(result)" title="把下一步的工作接上">回傳值會交給後續的 .then()。</Note>
-    </div>
-  </Frame>
-);
-
 const PromiseResolve: Page = () => (
   <Frame eyebrow="01 / 誰提供完成的結果" title="resolve：告訴 Promise「成功了，值是這個」。" titleSize={64} section="PROMISE">
     <div style={{ display: 'grid', gridTemplateColumns: '1120px 1fr', gap: 64 }}>
@@ -289,7 +242,7 @@ const PromiseResolve: Page = () => (
 const PromiseChain: Page = () => (
   <Frame eyebrow="01 / 把同一個流程攤平" title="用 return 接上下一步，結果就能往下傳。" titleSize={70} section="PROMISE">
     <div style={{ display: 'grid', gridTemplateColumns: '1190px 1fr', gap: 56 }}>
-      <Code size={30} title="三個 API 都回傳 Promise，沿用剛才 .then() 的讀法">{`doSomething()
+      <Code size={30} title="每個 .then() 收到上一步成功的值">{`doSomething()
   .then(function (result) {
     return doSomethingElse(result);
   })
@@ -315,32 +268,12 @@ const PromiseFailure: Page = () => (
       <Process n="後續成功 callback" title="先跳過">不執行第三步，<br />也不印成功的結果。</Process><Arrow />
       <Process n=".catch(failureCallback)" title="處理錯誤" accent>由 failureCallback<br />接到錯誤。</Process>
     </div>
-    <Strip style={{ marginTop: 54 }}>這條鏈把錯誤處理集中在尾端，讓成功流程更容易閱讀。</Strip>
-  </Frame>
-);
-
-const AwaitCompare: Page = () => (
-  <Frame eyebrow="01 / ASYNC、AWAIT 改善哪裡" title="同樣等上一步，但可以由上往下讀。" titleSize={72} section="ASYNC / AWAIT">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
-      <Code size={30} title="用 .then() 接下一步">{`doSomething()
-  .then(function (result) {
-    return doSomethingElse(result);
-  });`}</Code>
-      <Code size={30} title="在 async 函式裡，用 await 接下一步">{`const result =
-  await doSomething();
-const newResult =
-  await doSomethingElse(result);`}</Code>
-    </div>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48, marginTop: 42 }}>
-      <p style={body}>「成功後，呼叫這個函式。」</p>
-      <p style={body}>「等到結果，再執行下一行。」</p>
-    </div>
-    <Strip style={{ marginTop: 46 }}>await：等待這一步的 Promise 結果；這裡把它寫在 async 函式裡。</Strip>
+    <Strip style={{ marginTop: 54 }}>先看錯誤怎麼到 catch；稍後再追 catch 之後，呼叫端看到什麼。</Strip>
   </Frame>
 );
 
 const AsyncAwait: Page = () => (
-  <Frame eyebrow="01 / 加回完整的成功與失敗流程" title="try 寫正常步驟，catch 接住錯誤。" section="ASYNC / AWAIT">
+  <Frame eyebrow="01 / 同一個 PROMISE 流程，改用 AWAIT" title="await 讓相依步驟由上往下讀。" section="ASYNC / AWAIT">
     <div style={{ display: 'grid', gridTemplateColumns: '1190px 1fr', gap: 56 }}>
       <Code size={30} title="async function foo()：呼叫後回傳 Promise">{`async function foo() {
   try {
@@ -464,6 +397,7 @@ const Recap: Page = () => (
 );
 
 // Part 3: nine questions, 20 minutes. Reuse the runtime model; add static checking.
+
 const TypeScriptBoundary: Page = () => (
   <Frame eyebrow="03 / TYPESCRIPT 01 / 執行前的型別檢查" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
     <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 64px 1fr', gap: 24, alignItems: 'center' }}>
@@ -772,10 +706,31 @@ export const notes: (string | undefined)[] = [
 ];
 
 export default [
-  Cover, Agenda, ReadFunction, PassFunction, CallbackTrace, TimerCallback,
-  MainThread, DependentWork, CallbackHell, CallbackHellVisual, PromiseMeaning, ReadThen,
-  PromiseResolve, PromiseChain, PromiseFailure, AwaitCompare, AsyncAwait,
-  AwaitMeaning, TwoQueues, LoopRule, OrderAnswer, FetchBoundary, Recap,
-  TypeScriptBoundary, TypeInference, StructuralTyping, UnionType, TypeNarrowing,
-  InterfaceAndType, GenericResponse, RuntimeValidation, FullSessionRecap,
+  Cover,
+  Agenda,
+  CallbackBasics,
+  TimerCallback,
+  MainThread,
+  DependentCallbacks,
+  CallbackHellVisual,
+  PromiseMeaning,
+  PromiseResolve,
+  PromiseChain,
+  PromiseFailure,
+  AsyncAwait,
+  AwaitMeaning,
+  TwoQueues,
+  LoopRule,
+  OrderAnswer,
+  FetchBoundary,
+  Recap,
+  TypeScriptBoundary,
+  TypeInference,
+  StructuralTyping,
+  UnionType,
+  TypeNarrowing,
+  InterfaceAndType,
+  GenericResponse,
+  RuntimeValidation,
+  FullSessionRecap
 ] satisfies Page[];

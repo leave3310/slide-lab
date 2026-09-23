@@ -320,6 +320,80 @@ console.log("B");`}</Code>
   </Frame>
 );
 
+const IndependentRequests: Page = () => (
+  <Frame eyebrow="01 / 工程判斷：獨立工作需要依序等嗎" title="先發出兩個請求，再一起等待。" section="並行請求">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <div>
+        <Code title="依序 await / async 函式內" size={28}>{`const user =
+  await getUser(userId);
+const orders =
+  await getOrders(userId);`}</Code>
+        <div style={{ fontFamily: mono, fontSize: 50, lineHeight: 1.25, marginTop: 26 }}>200 + 300 ≈ 500 ms</div>
+      </div>
+      <div>
+        <Code title="兩個呼叫先發出 / async 函式內" size={28}>{`const [user, orders] = await Promise.all([
+  getUser(userId),
+  getOrders(userId),
+]);`}</Code>
+        <div style={{ fontFamily: mono, fontSize: 50, lineHeight: 1.25, marginTop: 26, background: yellow }}>max(200, 300) ≈ 300 ms</div>
+      </div>
+    </div>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 34 }}>假設 userId 已知、請求彼此獨立，耗時固定且忽略額外成本；數字是估算。</p>
+    <Strip style={{ marginTop: 24 }}>呼叫 API 啟動工作；Promise.all 彙整結果，不會新增 JS 執行緒。</Strip>
+  </Frame>
+);
+
+const ParallelConditions: Page = () => (
+  <Frame eyebrow="01 / 工程判斷：能不能改成 PROMISE.ALL" title="需要前一步的結果，就保留相依順序。" titleSize={70} section="並行的條件">
+    <div style={{ display: 'grid', gridTemplateColumns: '1050px 1fr', gap: 64 }}>
+      <Code title="async 函式內 / 訂單 API 需要查回來的 accountId" size={34}>{`const user = await getUser(userId);
+const orders =
+  await getOrders(user.accountId);`}</Code>
+      <Note tag="先問資料從哪裡來" title="accountId 此時才知道">第二個請求需要 user；<br />不能在第一個完成前發出。</Note>
+    </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 64, marginTop: 50 }}>
+      <Note tag="資料相依" title="輸入是否已經備妥？">不能為了省等待，把未知值傳出去。</Note>
+      <Note tag="副作用與容量" title="業務是否允許同時進行？">先確認操作順序、限流與資源負載。</Note>
+    </div>
+  </Frame>
+);
+
+const ParallelFailure: Page = () => (
+  <Frame eyebrow="01 / PROMISE.ALL：失敗代表什麼" title="一個失敗，整組 reject；其他工作仍可能繼續。" titleSize={64} section="錯誤與取消">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 18 }}>
+      <Process n="0 MS / 已發出" title="兩個請求都開始">getUser(userId)<br />getOrders(userId)</Process><Arrow />
+      <Process n="200 MS / 使用者請求失敗" title="Promise.all reject" accent>呼叫端可進入 catch。<br />不用等所有結果都回來。</Process><Arrow />
+      <Process n="300 MS / 訂單請求" title="仍可能完成">失敗不會自動取消<br />另一個已發出的請求。</Process>
+    </div>
+    <Strip style={{ marginTop: 42 }}>fail-fast 決定整組何時失敗；取消與回滾，需要另外設計。</Strip>
+    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 28 }}>需要每一項的成功／失敗結果時，可以考慮 Promise.allSettled。</p>
+  </Frame>
+);
+
+const CatchOutcome: Page = () => (
+  <Frame eyebrow="01 / CATCH 之後，呼叫端看到什麼" title="記錄錯誤之後，要恢復，還是繼續失敗？" titleSize={70} section="錯誤傳遞">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 48 }}>
+      <div>
+        <Code title="假設 getUser reject / 正常返回" size={30}>{`getUser(userId)
+  .catch(error => {
+    console.error(error);
+  });`}</Code>
+        <Strip style={{ marginTop: 26, fontSize: 30 }}>回傳的 Promise → fulfilled(undefined)</Strip>
+      </div>
+      <div>
+        <Code title="假設 getUser reject / 重新拋出" size={30}>{`getUser(userId)
+  .catch(error => {
+    console.error(error);
+    throw error;
+  });`}</Code>
+        <Strip style={{ marginTop: 26, fontSize: 30 }}>回傳的 Promise → rejected(error)</Strip>
+      </div>
+    </div>
+    <p style={{ ...body, marginTop: 34 }}>這一層能提供有意義的備援值，就 return；需要上層處理，就 throw。</p>
+    <p style={{ ...body, fontSize: 28, color: muted, marginTop: 18 }}>左邊假設記錄成功、沒有拋錯；這兩種處理也適用於 async 函式裡的 catch。</p>
+  </Frame>
+);
+
 const TwoQueues: Page = () => (
   <Frame eyebrow="02 / 現在來看：誰先執行" title="準備好的後續程式，會進入不同的佇列。" titleSize={70} section="EVENT LOOP">
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 56 }}>
@@ -336,7 +410,7 @@ const TwoQueues: Page = () => (
           <QueueItem accent>.then() 裡的 callback</QueueItem>
           <QueueItem accent>await 後面的程式</QueueItem>
         </div>
-        <p style={{ ...body, fontSize: 32, color: muted, marginTop: 30 }}>上一頁印出 C，就是 await 的後續。<br />Promise 結果確定後，安排為 microtask。</p>
+        <p style={{ ...body, fontSize: 32, color: muted, marginTop: 30 }}>先前印出 C，就是 await 的後續。<br />Promise 結果確定後，安排為 microtask。</p>
       </div>
     </div>
     <p style={{ ...body, fontSize: 32, color: muted, marginTop: 44 }}>佇列（queue）：放著準備好、等待執行的工作。</p>
@@ -351,12 +425,12 @@ const LoopRule: Page = () => (
       <Process n="03 / 再繼續" title="下一個 task">例如：準備好的<br />計時器 callback。</Process>
     </div>
     <p style={{ ...body, marginTop: 58 }}>Event Loop（事件迴圈）持續安排：主執行緒接下來執行哪個工作。</p>
-    <p style={{ fontSize: 28, color: muted, lineHeight: 1.5, marginTop: 24 }}>這裡用教材的簡化流程理解順序；佇列內的工作依先進先出（FIFO）處理。</p>
+    <p style={{ fontSize: 28, color: muted, lineHeight: 1.5, marginTop: 24 }}>此為瀏覽器的簡化模型；不同 task 來源不保證單一全域 FIFO 順序。</p>
   </Frame>
 );
 
 const OrderAnswer: Page = () => (
-  <Frame eyebrow="02 / 把剛才的觀念合起來" title="現在，一起讀懂 1 → 4 → 3 → 2。" section="EVENT LOOP">
+  <Frame eyebrow="02 / 把剛才的觀念合起來" title="先預測輸出，再說出每一步的理由。" section="EVENT LOOP">
     <Code size={32} title="Promise.resolve()：取得一個已成功完成的 Promise">{`console.log("1");
 setTimeout(() => console.log("2"), 0);
 Promise.resolve().then(() => console.log("3"));
@@ -384,19 +458,40 @@ const FetchBoundary: Page = () => (
   </Frame>
 );
 
-const Recap: Page = () => (
-  <Frame eyebrow="02 / JAVASCRIPT 回顧" title="下次看到這些寫法，就知道在處理什麼。" titleSize={70}>
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '44px 72px' }}>
-      <Note tag="CALLBACK" title="把接下來要做的事，傳給別人。">看誰會呼叫這個函式。</Note>
-      <Note tag="PROMISE" title="把成功與失敗的後續接起來。">看 .then() 怎麼回傳、.catch() 怎麼處理。</Note>
-      <Note tag="ASYNC / AWAIT" title="等到需要的結果，再往下做。">等待的是目前函式的後續步驟。</Note>
-      <Note tag="EVENT LOOP" title="理解準備好的工作，何時執行。">目前 task → 清空 microtask → 下個 task。</Note>
+const AsyncCpu: Page = () => (
+  <Frame eyebrow="02 / 工程判斷：加 ASYNC，畫面就不會卡嗎" title="同步計算不會因為 async 而移到別處。" titleSize={70} section="CPU 與主執行緒">
+    <div style={{ display: 'grid', gridTemplateColumns: '1020px 1fr', gap: 64 }}>
+      <Code title="假設 crunch() 是耗時的同步計算" size={34}>{`async function buildReport() {
+  return crunch();
+}
+
+buildReport();
+console.log("next");`}</Code>
+      <div style={{ display: 'grid', alignContent: 'start', gap: 20 }}>
+        <Steps>
+          <Step><Note tag="先預測" title="next 要等 crunch 結束"><div style={{ fontSize: 30, lineHeight: 1.5 }}>同步運算仍占住主執行緒；<br />async 只保證回傳 Promise。</div></Note></Step>
+          <Step><Note tag="工程上的處理" title="移走，或切開計算"><div style={{ fontSize: 30, lineHeight: 1.5 }}>Web Worker，或分批計算；<br />在批次間讓出執行機會。</div></Note></Step>
+        </Steps>
+      </div>
     </div>
-    <p style={{ fontSize: 22, lineHeight: 1.5, color: muted, marginTop: 42 }}>教材：〈js Event loop〉、〈從 Callback 到 Promise 再到 async、await 的演進歷史〉</p>
+    <Strip style={{ marginTop: 24 }}>加上 await Promise.resolve()，也不保證瀏覽器能先繪製畫面。</Strip>
   </Frame>
 );
 
-// Part 3: nine questions, 20 minutes. Reuse the runtime model; add static checking.
+const Recap: Page = () => (
+  <Frame eyebrow="02 / JAVASCRIPT 回顧" title="讀程式時，先回答這四個問題。" section="JAVASCRIPT → TYPESCRIPT">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '44px 72px' }}>
+      <Note tag="相依性" title="這兩個工作能一起開始嗎？">看輸入、業務順序與資源限制。</Note>
+      <Note tag="錯誤傳遞" title="catch 之後，上層看到什麼？">回傳一般值就恢復；throw 繼續失敗。</Note>
+      <Note tag="執行順序" title="等待外部工作，還是執行後續？">網路工作與 microtask 分開判斷。</Note>
+      <Note tag="執行負擔" title="現在是誰占住主執行緒？">async 不會把同步計算移到別處。</Note>
+    </div>
+    <Strip style={{ marginTop: 40 }}>接著看資料契約：TypeScript 能提前檢查什麼？哪些要等 runtime 驗證？</Strip>
+  </Frame>
+);
+
+
+// Part 3: one API result model, static checking, and an explicit runtime boundary (20 minutes).
 
 const TypeScriptBoundary: Page = () => (
   <Frame eyebrow="03 / TYPESCRIPT 01 / 執行前的型別檢查" title="多了型別，程式的執行方式會改變嗎？" titleSize={72} section="TYPESCRIPT">
@@ -719,10 +814,15 @@ export default [
   PromiseFailure,
   AsyncAwait,
   AwaitMeaning,
+  IndependentRequests,
+  ParallelConditions,
+  ParallelFailure,
+  CatchOutcome,
   TwoQueues,
   LoopRule,
   OrderAnswer,
   FetchBoundary,
+  AsyncCpu,
   Recap,
   TypeScriptBoundary,
   TypeInference,

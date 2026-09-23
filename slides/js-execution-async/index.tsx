@@ -696,6 +696,21 @@ const FullSessionRecap: Page = () => (
 );
 
 
+const QuestionsAndAnswers: Page = () => (
+  <section style={root}>
+    <div style={{ position: 'absolute', top: 128, left: 120, ...label, color: muted, display: 'flex', alignItems: 'center', gap: 16 }}>
+      <span style={{ width: 30, height: 12, background: yellow }} />04 / Q&A
+    </div>
+    <main style={{ position: 'absolute', top: 290, left: 120, right: 120, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 48, textAlign: 'center' }}>
+      <div style={{ width: 760, height: 320, background: yellow, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <h1 style={{ margin: 0, fontFamily: 'var(--osd-font-display)', fontSize: 192, fontWeight: 850, lineHeight: 1.1, letterSpacing: -5, color: '#252620' }}>Q&A</h1>
+      </div>
+      <p style={{ margin: 0, fontSize: 48, fontWeight: 500, lineHeight: 1.35 }}>歡迎提問，一起討論。</p>
+    </main>
+    <Footer section="Q&A / 開放提問" />
+  </section>
+);
+
 export const meta: SlideMeta = {
   title: 'Day 1｜JavaScript 執行、非同步與 TypeScript 型別 — Kylen',
   createdAt: '2026-09-15T03:11:44.021Z',
@@ -736,7 +751,8 @@ export const notes: (string | undefined)[] = [
   "46:30–48:00｜1 分 30 秒｜未知外部資料\n核心：合法 JSON 與符合 User shape 是兩件事；unknown 要求先檢查，卻不會自己執行驗證。\n講法：先用 25 秒指右側回應，問「這是合法 JSON 嗎？符合 User 嗎？」等 5 秒，答案是 JSON 語法合法，但 id 是字串、name 是 null，與 User 不符。接著用 30 秒讀左側 const raw: unknown = await response.json()，強調將值接到 unknown，會阻止我們未檢查就讀 raw.name。對照舊寫法 const user: User = await response.json()：標準 DOM 型別讓解析結果成為 any，any 能指派給 User，所以編譯時可通過，卻沒有驗證。改用 unknown 就是主動把這條寬鬆路徑截住，要求後續先檢查；換成 as User 也不會多出驗證。\n邊界：這段節錄假設 HTTP 已成功；下一頁之後會補完整邊界。標準 DOM 型別的 response.json() 回傳 Promise<any>，將 await 後的值明確接成 unknown，可以避免 any 繼續向內傳。unknown 接受任何值，但它是靜態型別，並不是驗證器。response.json() 只解析 JSON；非法 JSON 仍可能拋錯。\n銜接：最後 30 秒讀底部流程：外部 JSON → unknown → 真的執行欄位檢查 → User。下一頁打開檢查函式，不把解法停在名詞。\n參考：https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown",
   "48:00–51:00｜3 分鐘｜parseUser 的實際欄位檢查\n核心：以實際 JavaScript 條件拒絕不符合 User 的值；只有檢查通過才回傳 User。\n講法：先花 30 秒讀輸入 unknown、回傳 User，指出回傳註記是要達成的契約，真正的驗證在函式內。接著花 70 秒逐段看條件：typeof 確認物件且排除 null；in 確認欄位存在；再檢查 id 的 typeof 是 number、name 的 typeof 是 string。|| 是「任一不符合就失敗」，短路會讓前面不符合時停止，不會對 null 再做 in。typeof null 會得到 object，因此必須另外排除 null。\n互動：用 30 秒問兩個輸入結果：{ id: 1, name: \"Kylen\" } 會回傳 User；{ id: \"ABC\", name: null } 會拋 Invalid User，不會走到 return。缺少 name 也會失敗。可讓聽眾各說一個拒絕原因。\n講法續：再花 30 秒看最後 return，它建立一個只含已確認 id 與 name 的新物件。TS 沿檢查流程知道這兩個欄位型別，這裡沒有使用型別斷言或虛假的 type predicate。最後 20 秒提醒此頁的 throw 還需要上層接住。\n邊界：此例只落實 User 的兩個欄位型別；不承諾 id 為正整數、name 非空、唯一性、權限或完整業務規則。那些若是契約，需另加檢查。in 可以看見繼承欄位；這不是嚴格限定 plain object 或自有屬性的完整 schema validator，重點是檢查來源為 JSON 的最小 User shape。正式系統可用 schema 工具集中維護，但這裡不新增依賴或教工具語法。\n銜接：下一頁把 HTTP、JSON 解析、這個驗證函式串起來，並明確處理成功與失敗。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html",
   "51:00–53:30｜2 分 30 秒｜邊界回傳 ApiResult<User>\n核心：驗證成功才產生 ok: true；失敗在這層轉成明確的 ok: false，讓呼叫端處理。\n講法：先用 30 秒定位 loadUser(): Promise<ApiResult<User>>：async 函式回 Promise，await 後拿到我們定義的結果；endpoint 本身回的是 User JSON，ApiResult 包裝由這個函式建立。接著用 45 秒由上到下讀 try：fetch 取得 Response，先檢查 response.ok；解析 JSON 並接成 unknown；parseUser 通過後才放入 data。response.ok 是 HTTP 是否為 2xx，與回傳物件上的 ok 分屬不同物件，命名相同但角色不同。\n互動：問「如果 HTTP 200，但 name 是 null，最後會走哪裡？」停 5 秒，答案是 parseUser 拋錯，進 catch，回傳 ok: false。用約 25 秒列出四種失敗來源：網路拒絕、非 2xx 的 HTTP、JSON 語法錯誤、User shape 不符。fetch 不會只因 404／500 自動 reject，因此 HTTP 判斷不可省略。\n錯誤責任：再用 30 秒連回前半場 catch：這裡刻意把錯誤轉為有型別的結果，不是只 log 後回 undefined。catch 正常回傳後，Promise 是 fulfilled；呼叫端必須檢查 result.ok，才能使用 data 或顯示 error。可以口頭說 await loadUser() 的結果直接交給之前的 showUser，兩者契約相同。不要把 fulfilled 當成業務成功。\n邊界：這是教學用的統一錯誤訊息，原始錯誤記錄在 console；實際服務可依需求分類或交給上層。假設 console.error 本身正常執行。不展開 timeout、取消、重試或 HTTP 錯誤分類，以維持 20 分鐘主線。\n銜接：最後 15 秒指出 API 結果模型、narrowing、generic、unknown 與 runtime validation 現在串成同一條流程，進入全場回顧。\n參考：https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch#checking_response_status",
-  "53:30–55:00｜1 分 30 秒｜整場回顧\n核心：後端工程師讀 JS／TS 時，持續問三件事：工作是否相依、錯誤交給誰、資料是否真的符合契約。\n講法：用 20 秒讀第一欄，相依工作仍要依序，獨立 I/O 才考慮並行；Promise.all 失敗不會替其他工作取消。再用 20 秒讀第二欄，async 不會把同步計算搬到另一個執行緒；await 暫停目前函式的後續，Promise 後續仍循 microtask 規則。用 20 秒讀第三欄：union 描述成功與失敗，generic 保留 data 的型別；外部資料需要可執行的檢查。\n互動：剩餘 30 秒快速問「catch 回 ok: false，Promise 是 rejected 嗎？」答案是否，正常 return 會 fulfilled；再問「把 API JSON 標成 User 就完成驗證了嗎？」答案是否，必須實際執行 parseUser 這類檢查。讀黃色行動句完成教學。\n邊界：靜態型別檢查與 runtime validation 是互補責任；並行與額外執行緒也不是同一件事。不要在回顧加入新工具或新語法。\n收尾：55:00 結束主線，55:00–60:00 保留原訂 5 分鐘 Q&A／緩衝。TypeScript 段含本頁共 20 分鐘，互動停頓已包含在各頁配時。"
+  "53:30–55:00｜1 分 30 秒｜整場回顧\n核心：後端工程師讀 JS／TS 時，持續問三件事：工作是否相依、錯誤交給誰、資料是否真的符合契約。\n講法：用 20 秒讀第一欄，相依工作仍要依序，獨立 I/O 才考慮並行；Promise.all 失敗不會替其他工作取消。再用 20 秒讀第二欄，async 不會把同步計算搬到另一個執行緒；await 暫停目前函式的後續，Promise 後續仍循 microtask 規則。用 20 秒讀第三欄：union 描述成功與失敗，generic 保留 data 的型別；外部資料需要可執行的檢查。\n互動：剩餘 30 秒快速問「catch 回 ok: false，Promise 是 rejected 嗎？」答案是否，正常 return 會 fulfilled；再問「把 API JSON 標成 User 就完成驗證了嗎？」答案是否，必須實際執行 parseUser 這類檢查。讀黃色行動句完成教學。\n邊界：靜態型別檢查與 runtime validation 是互補責任；並行與額外執行緒也不是同一件事。不要在回顧加入新工具或新語法。\n收尾：55:00 結束主線，55:00–60:00 保留原訂 5 分鐘 Q&A／緩衝。TypeScript 段含本頁共 20 分鐘，互動停頓已包含在各頁配時。",
+  "55:00–60:00｜5 分鐘｜Q&A／緩衝\n開放聽眾自由提問，依現場提出的問題回應；需要時回到前面的範例說明。\n時間安排：前 4 分鐘回應聽眾問題，最後 1 分鐘整理尚未解決的問題並收尾。若前面超時，將本頁作為緩衝。"
 ];
 
 export default [
@@ -773,5 +789,6 @@ export default [
   RuntimeValidation,
   ParseUser,
   ValidateAtBoundary,
-  FullSessionRecap
+  FullSessionRecap,
+  QuestionsAndAnswers
 ] satisfies Page[];

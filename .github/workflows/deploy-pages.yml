@@ -43,6 +43,7 @@ jobs:
       - name: Build
         run: node scripts/build-pages.mjs
         env:
+          GA_MEASUREMENT_ID: ${{ vars.GA_MEASUREMENT_ID }}
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
 
       - name: Upload site

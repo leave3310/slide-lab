@@ -36,6 +36,13 @@ After changing the custom domain in Pages settings, rerun the workflow to rebuil
 asset URLs and the router base. No source changes are needed for that switch.
 Local `pnpm dev`, `pnpm build`, and `pnpm preview` retain their existing configuration.
 
+### Google Analytics
+
+Production deployments load Google Analytics when `GA_MEASUREMENT_ID` is set to a
+GA4 Measurement ID such as `G-XXXXXXXXXX`. For GitHub Pages, add it as a repository
+variable under **Settings → Secrets and variables → Actions → Variables**. Vercel and
+Netlify can use an environment variable with the same name.
+
 To reproduce the project-site build locally:
 
 ```bash

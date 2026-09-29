@@ -5,8 +5,7 @@ import { createViteConfig } from '@open-slide/core/vite';
 import { build, mergeConfig } from 'vite';
 
 const userCwd = fileURLToPath(new URL('../', import.meta.url));
-const basePath = (process.env.PAGES_BASE_PATH ?? '').replace(/^\/+|\/+$/g, '');
-const base = basePath ? `/${basePath}/` : '/';
+const base = '/';
 const config = await createViteConfig({ userCwd, mode: 'build' });
 
 console.info(`Building GitHub Pages with base: ${base}`);

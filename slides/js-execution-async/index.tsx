@@ -91,8 +91,8 @@ const Result = ({ value, kind }: { value: string; kind: string }) => (
   </div>
 );
 
-const Process = ({ n, title, children, accent = false }: { n: string; title: string; children: ReactNode; accent?: boolean }) => (
-  <div style={{ background: accent ? yellow : surface, padding: 32, boxSizing: 'border-box', minHeight: 310 }}>
+const Process = ({ n, title, children, accent = false, style }: { n: string; title: string; children: ReactNode; accent?: boolean; style?: CSSProperties }) => (
+  <div style={{ background: accent ? yellow : surface, padding: 32, boxSizing: 'border-box', minHeight: 310, ...style }}>
     <div style={{ ...label, color: accent ? '#6C5F1D' : muted, marginBottom: 30 }}>{n}</div>
     <h3 style={{ fontSize: 40, lineHeight: 1.3, margin: '0 0 20px' }}>{title}</h3>
     <p style={{ ...body, fontSize: 32 }}>{children}</p>
@@ -111,13 +111,12 @@ const Cover: Page = () => (
 );
 
 const Agenda: Page = () => (
-  <Frame eyebrow="今天的路線 / 60 分鐘" title="讀懂語法，再判斷工程上的取捨。" section="JAVASCRIPT → TYPESCRIPT">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 64px 1fr 64px 1fr', gap: 16, alignItems: 'center', marginTop: 20 }}>
-      <Process n="01 / 非同步流程 · 25 MIN" title="怎麼寫，怎麼取捨？">基礎寫法 18 分鐘<br />並行與錯誤 7 分鐘</Process><Arrow />
-      <Process n="02 / 執行順序 · 10 MIN" title="何時執行，誰被卡住？">Event Loop<br />非同步與同步計算</Process><Arrow />
-      <Process n="03 / 型別契約 · 20 MIN" title="哪些資料假設可信？" accent>API 結果建模<br />型別檢查與 runtime 驗證</Process>
+  <Frame eyebrow="今天的路線" title="讀懂語法，再判斷工程上的取捨。" section="JAVASCRIPT → TYPESCRIPT">
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 72px 1fr 72px 1fr', gap: 18, alignItems: 'center', marginTop: 52 }}>
+      <Process n="01 / 非同步流程" title="怎麼寫，怎麼取捨？" style={{ minHeight: 430, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>基礎寫法<br />並行與錯誤</Process><Arrow />
+      <Process n="02 / 執行順序" title="何時執行，誰被卡住？" style={{ minHeight: 430, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>Event Loop<br />非同步與同步計算</Process><Arrow />
+      <Process n="03 / 型別契約" title="哪些資料假設可信？" accent style={{ minHeight: 430, padding: 40, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>API 結果建模<br />型別檢查與 runtime 驗證</Process>
     </div>
-    <Strip style={{ marginTop: 58 }}>JavaScript 35 分鐘 · TypeScript 20 分鐘 · Q&A／緩衝 5 分鐘</Strip>
   </Frame>
 );
 
@@ -685,13 +684,12 @@ const ValidateAtBoundary: Page = () => (
 
 const FullSessionRecap: Page = () => (
   <Frame eyebrow="03 / 整場回顧 / 回到後端工程的三個判斷" title="安排工作、保留錯誤、確認資料契約。" titleSize={72} section="JAVASCRIPT → TYPESCRIPT">
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 36, marginTop: 8 }}>
-      <Process n="非同步流程" title="哪些工作可以並行？">先看資料相依性。<br />Promise.all 不自動取消。<br />catch 要決定如何回傳。</Process>
-      <Process n="執行模型" title="目前執行緒會卡住嗎？">await 暫停函式的後續。<br />async 不會搬走同步計算。<br />Promise 後續用 microtask。</Process>
-      <Process n="資料契約" title="資料真的符合宣告嗎？" accent>Union 描述成功與失敗。<br />Generic 保留 data 型別。<br />外部資料先實際驗證。</Process>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 30, marginTop: 34 }}>
+      <Process n="非同步流程" title="哪些工作可以並行？" style={{ minHeight: 390, padding: 38 }}>先看資料相依性。<br />Promise.all 不自動取消。<br />catch 要決定如何回傳。</Process>
+      <Process n="執行模型" title="目前執行緒會卡住嗎？" style={{ minHeight: 390, padding: 38 }}>await 暫停函式的後續。<br />async 不會搬走同步計算。<br />Promise 後續用 microtask。</Process>
+      <Process n="資料契約" title="資料真的符合宣告嗎？" accent style={{ minHeight: 390, padding: 38 }}>Union 描述成功與失敗。<br />Generic 保留 data 型別。<br />外部資料先實際驗證。</Process>
     </div>
-    <Strip style={{ marginTop: 48 }}>判斷是否能並行；說清楚錯誤交給誰；在資料進入系統時落實檢查。</Strip>
-    <p style={{ ...body, fontSize: 30, color: muted, marginTop: 28 }}>55:00 完成主線 · 最後 5 分鐘 Q&A／緩衝</p>
+    <Strip style={{ marginTop: 34, padding: '22px 30px', fontSize: 36 }}>判斷是否能並行；說清楚錯誤交給誰；在資料進入系統時落實檢查。</Strip>
   </Frame>
 );
 

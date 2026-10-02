@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { Step, Steps, useSlidePageNumber } from '@open-slide/core';
 import type { DesignSystem, Page, SlideMeta, SlideTransition } from '@open-slide/core';
 import callbackHellImage from './assets/callback-hell.png';
+import httpStatusErrorImage from './assets/http-status-200-error.png';
 
 export const design: DesignSystem = {
   palette: { bg: '#F5F3EB', text: '#252620', accent: '#F1D54A' },
@@ -582,10 +583,35 @@ const UnionType: Page = () => (
   </Frame>
 );
 
+const HttpStatusContract: Page = () => (
+  <Frame eyebrow="03 / HTTP CONTRACT / 不要把錯誤藏在 200 裡" title="請求沒有成功，就不要回 200 OK。" titleSize={72} section="API RESULT / HTTP STATUS">
+    <div style={{ display: 'grid', gridTemplateColumns: '480px 1fr', gap: 72, alignItems: 'start' }}>
+      <img
+        src={httpStatusErrorImage}
+        alt="後端交給前端一張寫著 200 OK 的紙，前端仔細看才發現內容其實是 Internal Server Error，status 500。"
+        width={752}
+        height={1433}
+        style={{ display: 'block', width: 'auto', height: 514, maxWidth: '100%', objectFit: 'contain', margin: '0 auto', borderRadius: 'var(--osd-radius)' }}
+      />
+      <div>
+        <Note tag="HTTP STATUS / 200 OK" title="HTTP 層先說了成功。">
+          <div style={{ fontSize: 32 }}>Client、監控與 gateway<br />都會先收到這個結果。</div>
+        </Note>
+        <div style={{ marginTop: 38 }}>
+          <Note tag="RESPONSE BODY / STATUS: 500" title="真正的錯誤藏在 body。">
+            <div style={{ fontSize: 32 }}>前端必須解析 payload，<br />才知道請求其實失敗。</div>
+          </Note>
+        </div>
+      </div>
+    </div>
+    <Strip style={{ marginTop: 18 }}>HTTP status 表達請求結果；response body 補充錯誤代碼與細節。</Strip>
+  </Frame>
+);
+
 const TypeNarrowing: Page = () => (
   <Frame eyebrow="03 / NARROWING / 用共同欄位分辨結果" title="判斷 ok，這一行的型別就確定了。" titleSize={72} section="API RESULT / NARROWING">
     <div style={{ display: 'grid', gridTemplateColumns: '1080px 1fr', gap: 56 }}>
-      <Code title="USERRESULT 沿用上一頁的兩種結果" language="TS" size={34}>{`function showUser(result: UserResult) {
+      <Code title="USERRESULT 沿用前面定義的兩種結果" language="TS" size={34}>{`function showUser(result: UserResult) {
   if (result.ok) {
     console.log(result.data.name.toUpperCase());
   } else {
@@ -743,7 +769,8 @@ export const notes: (string | undefined)[] = [
   "36:30–37:30｜1 分鐘｜Type inference\n核心：省略 annotation 不代表 any；程式碼已經提供足夠線索時，TS 會推斷型別。\n講法：前 20 秒由 userName 的字串初值、age 的數字初值，對到 string、number。再花 20 秒看 add 的兩個 number 參數，問「沒寫回傳型別，是否代表回傳 any？」停 5 秒後回答：不是，a + b 的結果推斷為 number。最後 15 秒說明局部值可交給 inference，對外函式仍可明確標示回傳契約。\n邊界：普通獨立函式的參數不會只因後面有人呼叫就回推，所以保留 a、b 的 annotation。不展開 literal widening、const、contextual typing 或 tsconfig。\n銜接：物件也能從欄位推斷出 shape；接下來的 data 沒寫 User，也可能符合需要 User 的函式。\n參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-annotations-on-variables",
   "37:30–39:30｜2 分鐘｜Structural typing\n核心：TypeScript 主要比較所需 shape 的相容性，不要求物件先正式宣告屬於某個型別。\n講法：先用 30 秒讀 User 的 id: number、name: string 與 printUser。再看 data 的三個欄位，問「沒有 implements User，printUser(data) 為什麼可以？」停 5 秒，逐一配對 id、name 都存在且型別相容。用約 40 秒對照 Java／C# 常見的 interface 身分判定：TS 在此看結構，多出的 email 不妨礙既有變數相容。最後約 45 秒說明頁底的 object literal 邊界與下一頁命名方式。\n邊界：不是 runtime 自動做 duck typing 檢查，也沒有複製、轉型或刪掉 email；函式內只知道 User 宣告的成員。直接把新寫的 object literal 傳進去，會有 excess property checking，因此此例刻意用既有 data 變數。不能推論任何額外欄位都永遠被接受。\n不延伸：不講 branding、private／protected 例外或 soundness；與後端語言比較只限 Java／C# 常見情境。\n銜接：接下來用一分鐘整理 interface 與 type，之後整段都沿用同一個 User。\n參考：https://www.typescriptlang.org/docs/handbook/type-compatibility.html",
   "39:30–40:30｜1 分鐘｜Interface 與 type\n核心：User 這個一般物件 shape，用 interface 或 type 都可以；後續用 type 命名聯合型別。\n講法：用 25 秒左右對照同樣的 id、name，指出只是兩種替代寫法，不要在同一作用域重複宣告兩個 User。問「type User 會在 runtime 建立一個 User 類別嗎？」停 5 秒，答案是不會；它只是型別的名字。再用 20 秒交代後面沿用左邊的 interface User，而 type 用來描述「成功或失敗」。最後 10 秒銜接 API 結果。\n邊界：兩者對一般 object shape 經常都能用，不表示所有功能完全相同。declaration merging、extends、intersection 留待被問到時再補，不列入主線。不把命名型別當成轉型或驗證。\n銜接：一個 API 結果可能成功，也可能失敗；用 union 把兩種結構分清楚。\n參考：https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#differences-between-type-aliases-and-interfaces",
-  "40:30–42:30｜2 分鐘｜用 API 結果理解 union\n核心：聯合型別描述兩種可能的結構：成功有 User，失敗有錯誤訊息。\n講法：先用 40 秒讀 type UserResult，將 | 讀成「或」。逐一指出 ok: true 與 data: User 成一組，ok: false 與 error: string 成另一組。這裡的 true／false 是特定值的型別，保留了欄位間的關聯；如果只有 ok: boolean 加上兩個 optional 欄位，就沒有同樣清楚的保證。這個對比只口頭提一句，不額外寫第三種模型。\n互動：用約 25 秒確認成功分支保證哪些欄位，然後按右鍵揭露問題：「還沒判斷 ok，可以直接讀 result.data 嗎？」停 5 秒。答案是不行，因為可能是失敗分支，根本不保證有 data。剩餘 50 秒用問題帶到下一頁的 if。\n邊界：這是我們在程式中約定的 service 結果模型，不是 fetch 的 Response 或 JavaScript 的 Promise 狀態；ok: false 不代表 Promise 必然 rejected。Union 不會在 runtime 驗證外部 JSON，也不會移除額外欄位；此處只講每個分支保證可用哪些欄位。\n銜接：用真正會執行的 if 判斷 ok，讓 TS 知道現在是哪個分支。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+  "40:30–42:00｜1 分 30 秒｜用 API 結果理解 union\n核心：聯合型別描述兩種可能的結構：成功有 User，失敗有錯誤訊息。\n講法：先讀 type UserResult，將 | 讀成「或」。指出 ok: true 與 data: User 成一組，ok: false 與 error: string 成另一組；true／false 是特定值的型別，保留了欄位間的關聯。\n互動：確認成功分支保證哪些欄位，接著按右鍵揭露問題：「還沒判斷 ok，可以直接讀 result.data 嗎？」停 5 秒。答案是不行，因為可能是失敗分支，根本不保證有 data。\n邊界：這是程式內部的 service 結果模型，不是 fetch 的 Response 或 Promise 狀態；ok: false 不代表 Promise 必然 rejected，也不是後端一律回傳 HTTP 200 的理由。Union 不會在 runtime 驗證外部 JSON。\n銜接：先用下一張圖把 HTTP 層與程式內的結果模型分開，再回來判斷 result.ok。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
+  "42:00–42:30｜30 秒｜HTTP status 與 response body\n核心：UserResult 是程式內部整理成功與失敗的型別，不是把所有 HTTP response 都包成 200 OK 的格式。\n講法：指向圖片：HTTP status 先說 200，但 body 才透露實際是 500。請求沒有成功，就應回傳適當的 4xx 或 5xx；body 再提供業務錯誤代碼與細節。否則 client、監控與 gateway 都會先把它視為成功。\n邊界：fetch 遇到 4xx／5xx 通常不會自動 reject，前端仍須檢查 response.ok；正確的 status 也不代表 JSON shape 已符合 User。HTTP 結果與資料驗證是兩個不同問題。\n銜接：HTTP 層處理完後，程式可以整理成 UserResult；接著判斷 result.ok，讓 TypeScript 確認是哪個分支。",
   "42:30–44:30｜2 分鐘｜Narrowing 與 discriminated union\n核心：共同欄位 ok 的特定值，可以區分 union；TS 跟著 if／else，確認每一行能讀取的欄位。\n講法：先花 30 秒從 showUser 的 UserResult 輸入讀到 if (result.ok)。問「這裡還可能是失敗結果嗎？」停 5 秒後按右鍵揭露成功說明：不可能，所以 data 是 User、name 是 string，可以用 toUpperCase()。再花 30 秒讀 else，第二次揭露：ok 是 false，所以 error 是 string，這裡不能直接取 data。\n互動：用約 20 秒追問「如果把 result.data.name 放到 if 前面，會怎樣？」答案是型別檢查會指出 data 不是每一個分支都有。最後約 35 秒讀黃色結論並命名 discriminated union：共用一個欄位，但它的特定值會分辨不同結構。\n邊界：if 是保留並執行的 JavaScript；TS 在執行前分析這條控制流程。Narrowing 不會替資料轉型，也不會把所有外部值驗證成 User。範例在 strict 型別檢查下使用；不用 as 強制跳過檢查。\n銜接：如果使用者清單也需要相同成功／失敗包裝，下一頁讓成功資料型別可替換。\n參考：https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions",
   "44:30–46:30｜2 分鐘｜同一個 ApiResult<T>\n核心：泛型把成功資料的型別保留下來；union 的成功／失敗關係保持不變。\n講法：先用 40 秒把上一頁 UserResult 的 User 換成 T，讀 ApiResult<T>：成功的 data 是 T，失敗的 error 仍是 string。再用 30 秒讀兩個實例，ApiResult<User> 的成功資料是一個 User；ApiResult<User[]> 的成功資料是 User 陣列，[] 在這裡表示陣列型別。UserResult 這行是改寫先前的定義，不是在同一作用域宣告第二個同名 alias。\n互動：問「對 ApiResult<User[]>，是不是一拿到 result 就能讀 data.length？」停 5 秒。答案是仍要先判斷 ok；成功分支才保證 data 是陣列。若直接使用 any，就失去這個位置的檢查，例如 data.naem 拼錯也可能不被阻止。最後約 45 秒連回 T 只是可替換的型別位置，並轉向資料來源。\n邊界：T 不是 runtime 參數，寫 ApiResult<User> 不會建立、轉型或驗證 User。泛型仍需遵守已經看過的 narrowing；不教 conditional types、infer 或複雜約束。\n銜接：如果 User 是我們自己建立，TS 看得見欄位；如果它來自網路，這些保證從哪裡來？\n參考：https://www.typescriptlang.org/docs/handbook/2/generics.html",
   "46:30–48:00｜1 分 30 秒｜未知外部資料\n核心：合法 JSON 與符合 User shape 是兩件事；unknown 要求先檢查，卻不會自己執行驗證。\n講法：先用 25 秒指右側回應，問「這是合法 JSON 嗎？符合 User 嗎？」等 5 秒，答案是 JSON 語法合法，但 id 是字串、name 是 null，與 User 不符。接著用 30 秒讀左側 const raw: unknown = await response.json()，強調將值接到 unknown，會阻止我們未檢查就讀 raw.name。對照舊寫法 const user: User = await response.json()：標準 DOM 型別讓解析結果成為 any，any 能指派給 User，所以編譯時可通過，卻沒有驗證。改用 unknown 就是主動把這條寬鬆路徑截住，要求後續先檢查；換成 as User 也不會多出驗證。\n邊界：這段節錄假設 HTTP 已成功；下一頁之後會補完整邊界。標準 DOM 型別的 response.json() 回傳 Promise<any>，將 await 後的值明確接成 unknown，可以避免 any 繼續向內傳。unknown 接受任何值，但它是靜態型別，並不是驗證器。response.json() 只解析 JSON；非法 JSON 仍可能拋錯。\n銜接：最後 30 秒讀底部流程：外部 JSON → unknown → 真的執行欄位檢查 → User。下一頁打開檢查函式，不把解法停在名詞。\n參考：https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown",
@@ -782,6 +809,7 @@ export default [
   StructuralTyping,
   InterfaceAndType,
   UnionType,
+  HttpStatusContract,
   TypeNarrowing,
   GenericResponse,
   RuntimeValidation,
